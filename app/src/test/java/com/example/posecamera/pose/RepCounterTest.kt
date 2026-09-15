@@ -27,10 +27,11 @@ class RepCounterTest {
     @Test
     fun countsACompleteValidCycleAsClean() {
         val counter = RepCounter()
-        completeRep(counter, bottomState = SquatFormState.GREEN, bottomAngle = 80f)
+        completeRep(counter, bottomState = FormState.GREEN, bottomAngle = 80f)
 
         val summary = counter.endSet()
         assertEquals(1, summary.attemptedReps)
+        assertEquals(ExerciseType.SQUAT, summary.exerciseType)
         assertEquals(1, summary.cleanReps)
         assertEquals(0, summary.rejectedReps)
         assertEquals(100f, summary.formScore, 0.001f)
@@ -40,7 +41,7 @@ class RepCounterTest {
     @Test
     fun rejectsARepThatNeverReachesGreenDepth() {
         val counter = RepCounter()
-        completeRep(counter, bottomState = SquatFormState.YELLOW, bottomAngle = 100f)
+        completeRep(counter, bottomState = FormState.YELLOW, bottomAngle = 100f)
 
         val summary = counter.endSet()
         assertEquals(1, summary.rejectedReps)
@@ -52,7 +53,7 @@ class RepCounterTest {
         val counter = RepCounter()
         completeRep(
             counter,
-            bottomState = SquatFormState.GREEN,
+            bottomState = FormState.GREEN,
             bottomAngle = 80f,
             descentValgus = RED_KNEE_VALGUS_OFFSET,
         )
@@ -68,7 +69,7 @@ class RepCounterTest {
         val counter = RepCounter()
         completeRep(
             counter,
-            bottomState = SquatFormState.GREEN,
+            bottomState = FormState.GREEN,
             bottomAngle = 80f,
             downFrameIntervalMillis = 50L,
         )
@@ -79,11 +80,11 @@ class RepCounterTest {
     @Test
     fun storesAllReasonsAndFindsMostCommonReason() {
         val counter = RepCounter()
-        completeRep(counter, bottomState = SquatFormState.GREEN, bottomAngle = 80f)
-        completeRep(counter, bottomState = SquatFormState.YELLOW, bottomAngle = 100f)
+        completeRep(counter, bottomState = FormState.GREEN, bottomAngle = 80f)
+        completeRep(counter, bottomState = FormState.YELLOW, bottomAngle = 100f)
         completeRep(
             counter,
-            bottomState = SquatFormState.YELLOW,
+            bottomState = FormState.YELLOW,
             bottomAngle = 100f,
             descentValgus = RED_KNEE_VALGUS_OFFSET,
         )
@@ -103,7 +104,7 @@ class RepCounterTest {
     @Test
     fun endSetResetsInMemoryCounters() {
         val counter = RepCounter()
-        completeRep(counter, bottomState = SquatFormState.GREEN, bottomAngle = 80f)
+        completeRep(counter, bottomState = FormState.GREEN, bottomAngle = 80f)
         counter.endSet()
 
         val progress = counter.progress()
@@ -124,9 +125,61 @@ class RepCounterTest {
         assertEquals(0, summary.rejectedReps)
     }
 
+    @Test
+    fun countsCleanPushUpAfterBottomAndLockout() {
+        val counter = RepCounter(PushUpExerciseConfig)
+
+        completePushUp(counter, bodyDeviation = 10f)
+
+        val summary = counter.endSet()
+        assertEquals(ExerciseType.PUSH_UP, summary.exerciseType)
+        assertEquals(1, summary.attemptedReps)
+        assertEquals(1, summary.cleanReps)
+        assertEquals(0, summary.rejectedReps)
+        assertEquals(100f, summary.formScore, 0.001f)
+    }
+
+    @Test
+    fun rejectsCompletedPushUpWithBadBodyLine() {
+        val counter = RepCounter(PushUpExerciseConfig)
+
+        advancePushUp(counter, angle = 145f, bodyDeviation = 21f)
+        advancePushUp(counter, angle = 90f)
+        advancePushUp(counter, angle = 120f)
+        advancePushUp(counter, angle = 160f)
+
+        val summary = counter.endSet()
+        assertEquals(1, summary.attemptedReps)
+        assertEquals(0, summary.cleanReps)
+        assertEquals(1, summary.rejectedReps)
+        assertEquals(0f, summary.formScore, 0.001f)
+        assertEquals(listOf("body line out of alignment"), summary.rejectionReasons)
+    }
+
+    @Test
+    fun incompletePushUpDoesNotCount() {
+        val counter = RepCounter(PushUpExerciseConfig)
+
+        advancePushUp(counter, angle = 145f)
+        advancePushUp(counter, angle = 100f)
+        advancePushUp(counter, angle = 160f)
+
+        assertEquals(0, counter.endSet().attemptedReps)
+    }
+
+    @Test
+    fun ignoresAnalysisForAnotherExercise() {
+        val counter = RepCounter(PushUpExerciseConfig)
+
+        advance(counter, angle = 80f)
+
+        assertEquals(RepMovementState.STANDING, counter.progress().movementState)
+        assertEquals(0, counter.endSet().attemptedReps)
+    }
+
     private fun completeRep(
         counter: RepCounter,
-        bottomState: SquatFormState,
+        bottomState: FormState,
         bottomAngle: Float,
         descentValgus: Float = 0f,
         downFrameIntervalMillis: Long = 250L,
@@ -147,10 +200,29 @@ class RepCounterTest {
         advance(counter, angle = 170f)
     }
 
+    private fun completePushUp(counter: RepCounter, bodyDeviation: Float) {
+        advancePushUp(counter, angle = 145f, bodyDeviation = bodyDeviation)
+        advancePushUp(counter, angle = 90f, bodyDeviation = bodyDeviation)
+        advancePushUp(counter, angle = 120f, bodyDeviation = bodyDeviation)
+        advancePushUp(counter, angle = 160f, bodyDeviation = bodyDeviation)
+    }
+
+    private fun advancePushUp(
+        counter: RepCounter,
+        angle: Float,
+        bodyDeviation: Float = 0f,
+        frames: Int = TRANSITION_CONFIRMATION_FRAMES,
+    ) {
+        repeat(frames) {
+            timestamp += 100L
+            counter.onFrame(pushUpForm(angle, bodyDeviation), timestamp)
+        }
+    }
+
     private fun advance(
         counter: RepCounter,
         angle: Float,
-        state: SquatFormState = SquatFormState.YELLOW,
+        state: FormState = FormState.YELLOW,
         valgus: Float = 0f,
         intervalMillis: Long = 100L,
         frames: Int = TRANSITION_CONFIRMATION_FRAMES,
@@ -166,7 +238,7 @@ class RepCounterTest {
 
     private fun form(
         angle: Float,
-        state: SquatFormState,
+        state: FormState,
         valgus: Float,
     ) = SquatFormResult(
         state = state,
@@ -174,5 +246,15 @@ class RepCounterTest {
         rightKneeAngleDegrees = angle,
         leftKneeValgusOffset = valgus,
         rightKneeValgusOffset = 0f,
+    )
+
+    private fun pushUpForm(angle: Float, bodyDeviation: Float) = PushUpFormResult(
+        state = classifyPushUpBodyLine(bodyDeviation),
+        side = BodySide.LEFT,
+        elbowAngleDegrees = angle,
+        bodyLineAngleDegrees = 180f - bodyDeviation,
+        bodyDeviationDegrees = bodyDeviation,
+        activeLandmarks = emptySet(),
+        activeConnections = emptySet(),
     )
 }

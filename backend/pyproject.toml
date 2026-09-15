@@ -1,0 +1,47 @@
+[project]
+name = "sahirep-backend"
+version = "0.1.0"
+description = "Post-workout account, streak, and set-history sync for SahiRep"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.1,<4",
+    "flask-jwt-extended>=4.7,<5",
+    "flask-sqlalchemy>=3.1,<4",
+    "pydantic>=2.11,<3",
+]
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.31,<2",
+    "pytest>=8,<10",
+    "ruff>=0.12,<1",
+]
+
+[tool.basedpyright]
+typeCheckingMode = "standard"
+pythonVersion = "3.12"
+include = ["app.py", "test_app.py"]
+exclude = [".venv", "instance"]
+reportUnusedCallResult = "warning"
+reportUnnecessaryTypeIgnoreComment = "error"
+
+[tool.pytest.ini_options]
+addopts = ["-ra", "--strict-config", "--strict-markers"]
+filterwarnings = ["error"]
+testpaths = ["."]
+python_files = ["test_*.py"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["COM812", "CPY001", "D", "ISC001", "S104"]
+
+[tool.ruff.lint.per-file-ignores]
+"test_*.py" = ["D", "PLR2004", "S101", "S105", "S106"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

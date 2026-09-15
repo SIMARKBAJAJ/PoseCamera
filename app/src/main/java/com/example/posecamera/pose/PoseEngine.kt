@@ -23,6 +23,7 @@ class PoseEngine(
     private val inferenceExecutor: ExecutorService,
     private val onFrame: (PoseFrame) -> Unit,
     private val onError: (String) -> Unit,
+    initialConfig: ExerciseConfig = SquatExerciseConfig,
 ) {
     private val appContext = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -36,6 +37,12 @@ class PoseEngine(
     private var pendingFrame: FrameMetadata? = null
     private val closed = AtomicBoolean(false)
     private var closeFinalized = false
+    @Volatile
+    private var activeConfig = initialConfig
+
+    fun setActiveConfig(config: ExerciseConfig) {
+        activeConfig = config
+    }
 
     fun initialize() {
         if (closed.get()) return
@@ -79,7 +86,7 @@ class PoseEngine(
                         }
                         val completedAtMillis = SystemClock.uptimeMillis()
                         val fps = fpsTracker.record(completedAtMillis)
-                        val squatForm = analyzeSquatForm(
+                        val analysis = metadata.config.analyze(
                             landmarks,
                             metadata.orientedWidth,
                             metadata.orientedHeight,
@@ -92,7 +99,7 @@ class PoseEngine(
                                     imageHeight = metadata.orientedHeight,
                                     fps = fps,
                                     mirrorHorizontally = metadata.mirrorHorizontally,
-                                    squatForm = squatForm,
+                                    analysis = analysis,
                                     timestampMillis = completedAtMillis,
                                 ),
                             )
@@ -148,6 +155,7 @@ class PoseEngine(
                 orientedWidth = if (swapsDimensions) height else width,
                 orientedHeight = if (swapsDimensions) width else height,
                 mirrorHorizontally = mirrorHorizontally,
+                config = activeConfig,
             )
             inferenceInFlight = true
             val processingOptions = ImageProcessingOptions.builder()
@@ -250,6 +258,7 @@ class PoseEngine(
         val orientedWidth: Int,
         val orientedHeight: Int,
         val mirrorHorizontally: Boolean,
+        val config: ExerciseConfig,
     )
 
     companion object {

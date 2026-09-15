@@ -4,123 +4,49 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
-  <title>PoseCamera Preview</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='black'/%3E%3Ccircle cx='16' cy='8' r='3' fill='white'/%3E%3Cpath d='M16 11v7m0-4-6 5m6-5 6 5m-6-1-4 9m4-9 4 9' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <meta name="description" content="SahiRep on-device pose detection preview">
+  <title>SahiRep Pose Preview</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23000'/%3E%3Cpath d='M22 10c-1.4-1.3-3.4-2-5.7-2-3.1 0-5.3 1.5-5.3 3.8 0 2.1 1.6 3.2 5.1 4 2.2.5 3 1 3 2 0 1.2-1.2 2-3 2-2.2 0-4.2-.8-5.7-2.3L8 20.3c2 1.8 4.8 2.7 7.8 2.7 3.8 0 6.2-1.8 6.2-4.7 0-2.5-1.7-3.8-5.4-4.6-2-.5-2.7-.9-2.7-1.7 0-.8.9-1.3 2.4-1.3 1.6 0 3 .5 4.1 1.6Z' fill='%234ade80'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main id="app">
-    <section class="screen permission-screen" id="permission-screen" aria-labelledby="permission-copy">
-      <div class="permission-content">
-        <p id="permission-copy">Camera access is required to detect your pose.</p>
-        <button class="button button-primary" id="grant-camera" type="button">Grant camera access</button>
-        <p class="preview-note">Browser preview. The Android app performs pose detection on-device.</p>
+  <main class="app-shell">
+    <header class="app-header">
+      <p class="eyebrow">SahiRep</p>
+      <h1>Live pose preview</h1>
+      <p class="subtitle">Stage 1: on-device camera skeleton tracking</p>
+    </header>
+
+    <section class="preview-card" aria-labelledby="preview-heading">
+      <h2 class="visually-hidden" id="preview-heading">Webcam pose detection</h2>
+
+      <div class="camera-stage" id="camera-stage">
+        <video
+          id="camera-video"
+          autoplay
+          muted
+          playsinline
+          aria-label="Live webcam feed"
+        ></video>
+        <canvas
+          id="pose-canvas"
+          role="img"
+          aria-label="Detected pose skeleton overlay"
+        >Your browser does not support canvas.</canvas>
+
+        <p class="privacy-badge">On-device only</p>
       </div>
-    </section>
 
-    <section class="screen camera-screen" id="camera-screen" aria-label="Live pose camera" hidden>
-      <div class="demo-feed" aria-hidden="true">
-        <div class="floor-line"></div>
+      <div class="status-row">
+        <span class="status-dot" aria-hidden="true"></span>
+        <p id="status" role="status" aria-live="polite">Ready - press Start camera</p>
       </div>
-      <video id="camera-video" autoplay muted playsinline aria-label="Camera preview"></video>
 
-      <svg class="pose-overlay" viewBox="0 0 360 640" role="img" aria-label="Pose skeleton overlay">
-        <g class="pose-body" id="pose-body">
-          <g class="neutral-lines">
-            <line x1="180" y1="92" x2="154" y2="112" />
-            <line x1="180" y1="92" x2="206" y2="112" />
-            <line x1="154" y1="112" x2="144" y2="120" />
-            <line x1="154" y1="112" x2="170" y2="130" />
-            <line x1="206" y1="112" x2="216" y2="120" />
-            <line x1="206" y1="112" x2="190" y2="130" />
-            <line x1="180" y1="105" x2="180" y2="150" />
-            <line x1="180" y1="150" x2="180" y2="260" />
-            <line x1="120" y1="215" x2="240" y2="215" />
-            <line x1="180" y1="165" x2="120" y2="215" />
-            <line x1="120" y1="215" x2="92" y2="300" />
-            <line x1="92" y1="300" x2="78" y2="360" />
-            <line x1="78" y1="360" x2="72" y2="370" />
-            <line x1="180" y1="165" x2="240" y2="215" />
-            <line x1="240" y1="215" x2="268" y2="300" />
-            <line x1="268" y1="300" x2="282" y2="360" />
-            <line x1="282" y1="360" x2="288" y2="370" />
-            <line x1="120" y1="215" x2="150" y2="275" />
-            <line x1="240" y1="215" x2="210" y2="275" />
-            <line x1="115" y1="535" x2="105" y2="555" />
-            <line x1="245" y1="535" x2="255" y2="555" />
-            <line x1="154" y1="122" x2="170" y2="130" />
-            <line x1="206" y1="122" x2="190" y2="130" />
-          </g>
-          <g class="form-lines">
-            <line x1="150" y1="275" x2="210" y2="275" />
-            <line x1="150" y1="275" x2="130" y2="405" />
-            <line x1="130" y1="405" x2="115" y2="535" />
-            <line x1="210" y1="275" x2="230" y2="405" />
-            <line x1="230" y1="405" x2="245" y2="535" />
-          </g>
-          <g class="neutral-points">
-            <circle cx="180" cy="92" r="6" />
-            <circle cx="154" cy="112" r="5" />
-            <circle cx="206" cy="112" r="5" />
-            <circle cx="144" cy="120" r="4" />
-            <circle cx="216" cy="120" r="4" />
-            <circle cx="170" cy="130" r="4" />
-            <circle cx="190" cy="130" r="4" />
-            <circle cx="180" cy="150" r="5" />
-            <circle cx="120" cy="215" r="5" />
-            <circle cx="240" cy="215" r="5" />
-            <circle cx="92" cy="300" r="5" />
-            <circle cx="268" cy="300" r="5" />
-            <circle cx="78" cy="360" r="5" />
-            <circle cx="282" cy="360" r="5" />
-            <circle cx="72" cy="370" r="4" />
-            <circle cx="288" cy="370" r="4" />
-          </g>
-          <g class="form-points">
-            <circle cx="150" cy="275" r="6" />
-            <circle cx="210" cy="275" r="6" />
-            <circle cx="130" cy="405" r="6" />
-            <circle cx="230" cy="405" r="6" />
-          </g>
-          <g class="neutral-points">
-            <circle cx="115" cy="535" r="5" />
-            <circle cx="245" cy="535" r="5" />
-            <circle cx="105" cy="555" r="4" />
-            <circle cx="255" cy="555" r="4" />
-          </g>
-        </g>
-      </svg>
-
-      <p class="fps-chip" id="fps-chip" aria-live="polite">0.0 FPS</p>
-      <p class="preview-badge">Browser preview</p>
-      <p class="camera-message" id="camera-message" role="status" hidden></p>
-
-      <button class="button button-primary end-set" id="end-set" type="button">End set</button>
-      <button class="icon-button switch-camera" id="switch-camera" type="button" aria-label="Switch camera">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M20 7h-3.2l-1.5-2H8.7L7.2 7H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z" />
-          <path d="M15.5 11.2A4 4 0 0 0 9 10l-1.2.3" />
-          <path d="m8.4 8.4-.6 1.9 1.9.6" />
-          <path d="M8.5 14.8A4 4 0 0 0 15 16l1.2-.3" />
-          <path d="m15.6 17.6.6-1.9-1.9-.6" />
-        </svg>
-      </button>
-    </section>
-
-    <section class="screen summary-screen" id="summary-screen" aria-labelledby="summary-title" hidden>
-      <div class="summary-content">
-        <h1 id="summary-title">Set summary</h1>
-        <dl class="summary-list">
-          <div><dt>Attempted:</dt><dd id="attempted-value">0</dd></div>
-          <div><dt>Clean:</dt><dd id="clean-value">0</dd></div>
-          <div><dt>Rejected:</dt><dd id="rejected-value">0</dd></div>
-          <div><dt>FormScore:</dt><dd id="score-value">0.0%</dd></div>
-          <div><dt>Most common rejection:</dt><dd id="reason-value">None</dd></div>
-        </dl>
-        <button class="button button-primary" id="start-new-set" type="button">Start new set</button>
-      </div>
+      <button class="button" id="start-camera" type="button">Start camera</button>
+      <p class="privacy-copy">Video frames stay in this browser and are never uploaded.</p>
     </section>
   </main>
-  <script src="app.js"></script>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>

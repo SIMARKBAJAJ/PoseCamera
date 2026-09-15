@@ -8,14 +8,14 @@ class SquatFormAnalyzerTest {
     @Test
     fun calculatesStraightAndRightAngles() {
         val knee = PosePoint(0.5f, 0.5f)
-        val straight = kneeAngleDegrees(
+        val straight = angleDegrees(
             PosePoint(0.5f, 0.25f),
             knee,
             PosePoint(0.5f, 0.75f),
             100,
             100,
         )
-        val right = kneeAngleDegrees(
+        val right = angleDegrees(
             PosePoint(0.5f, 0.25f),
             knee,
             PosePoint(0.75f, 0.5f),
@@ -29,7 +29,7 @@ class SquatFormAnalyzerTest {
 
     @Test
     fun correctsAngleForFrameAspectRatio() {
-        val angle = kneeAngleDegrees(
+        val angle = angleDegrees(
             PosePoint(0.6f, 0.3f),
             PosePoint(0.5f, 0.5f),
             PosePoint(0.6f, 0.7f),
@@ -43,21 +43,21 @@ class SquatFormAnalyzerTest {
     @Test
     fun returnsNoAngleForDegenerateVector() {
         val knee = PosePoint(0.5f, 0.5f)
-        assertNull(kneeAngleDegrees(knee, knee, PosePoint(0.5f, 0.8f), 100, 100))
+        assertNull(angleDegrees(knee, knee, PosePoint(0.5f, 0.8f), 100, 100))
     }
 
     @Test
     fun classifiesDepthBoundaries() {
         assertEquals(
-            SquatFormState.GREEN,
+            FormState.GREEN,
             classifySquatForm(89.9f, 89.9f, 0.04f, 0.04f),
         )
         assertEquals(
-            SquatFormState.YELLOW,
+            FormState.YELLOW,
             classifySquatForm(90f, 89f, 0f, 0f),
         )
         assertEquals(
-            SquatFormState.RED,
+            FormState.RED,
             classifySquatForm(109f, 110f, 0f, 0f),
         )
     }
@@ -65,15 +65,15 @@ class SquatFormAnalyzerTest {
     @Test
     fun classifiesValgusBoundaries() {
         assertEquals(
-            SquatFormState.GREEN,
+            FormState.GREEN,
             classifySquatForm(80f, 80f, 0.04f, 0.04f),
         )
         assertEquals(
-            SquatFormState.YELLOW,
+            FormState.YELLOW,
             classifySquatForm(80f, 80f, 0.05f, 0f),
         )
         assertEquals(
-            SquatFormState.RED,
+            FormState.RED,
             classifySquatForm(80f, 80f, 0f, 0.10f),
         )
     }
@@ -81,7 +81,7 @@ class SquatFormAnalyzerTest {
     @Test
     fun usesWorstLegForFrameState() {
         assertEquals(
-            SquatFormState.RED,
+            FormState.RED,
             classifySquatForm(80f, 115f, 0f, 0f),
         )
     }
@@ -102,8 +102,8 @@ class SquatFormAnalyzerTest {
             it[RIGHT_ANKLE] = it[RIGHT_ANKLE].copy(presence = 0.59f)
         }
 
-        assertEquals(SquatFormState.GREY, analyzeSquatForm(lowVisibility, 100, 100).state)
-        assertEquals(SquatFormState.GREY, analyzeSquatForm(lowPresence, 100, 100).state)
+        assertEquals(FormState.GREY, analyzeSquatForm(lowVisibility, 100, 100).state)
+        assertEquals(FormState.GREY, analyzeSquatForm(lowPresence, 100, 100).state)
     }
 
     @Test
@@ -115,7 +115,7 @@ class SquatFormAnalyzerTest {
             )
         }
 
-        assertEquals(SquatFormState.RED, analyzeSquatForm(boundaryPose, 100, 100).state)
+        assertEquals(FormState.RED, analyzeSquatForm(boundaryPose, 100, 100).state)
     }
 
     @Test
@@ -123,8 +123,8 @@ class SquatFormAnalyzerTest {
         val missingAnkle = validPose().take(RIGHT_ANKLE)
         val degenerate = validPose().also { it[LEFT_HIP] = it[LEFT_KNEE] }
 
-        assertEquals(SquatFormState.GREY, analyzeSquatForm(missingAnkle, 100, 100).state)
-        assertEquals(SquatFormState.GREY, analyzeSquatForm(degenerate, 100, 100).state)
+        assertEquals(FormState.GREY, analyzeSquatForm(missingAnkle, 100, 100).state)
+        assertEquals(FormState.GREY, analyzeSquatForm(degenerate, 100, 100).state)
     }
 
     @Test

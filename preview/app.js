@@ -1,135 +1,249 @@
-const screens = {
-  permission: document.querySelector("#permission-screen"),
-  camera: document.querySelector("#camera-screen"),
-  summary: document.querySelector("#summary-screen"),
-};
+import {
+  DrawingUtils,
+  FilesetResolver,
+  PoseLandmarker,
+} from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/+esm";
+
+const WASM_ROOT = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm";
+const MODEL_URL =
+  "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
 
 const video = document.querySelector("#camera-video");
-const poseBody = document.querySelector("#pose-body");
-const fpsChip = document.querySelector("#fps-chip");
-const cameraMessage = document.querySelector("#camera-message");
-const grantCamera = document.querySelector("#grant-camera");
-const endSet = document.querySelector("#end-set");
-const switchCamera = document.querySelector("#switch-camera");
-const startNewSet = document.querySelector("#start-new-set");
-
-const formStates = [
-  { color: "#9ca3af", squat: false, result: "unjudgeable" },
-  { color: "#facc15", squat: true, result: "rejected" },
-  { color: "#4ade80", squat: true, result: "clean" },
-  { color: "#4ade80", squat: false, result: "clean" },
-  { color: "#f87171", squat: true, result: "rejected" },
-];
+const canvas = document.querySelector("#pose-canvas");
+const cameraStage = document.querySelector("#camera-stage");
+const status = document.querySelector("#status");
+const startButton = document.querySelector("#start-camera");
+const canvasContext = canvas.getContext("2d");
 
 let stream = null;
-let facingMode = "user";
-let animationTimer = null;
-let fpsTimer = null;
-let stateIndex = 0;
-let cleanFrames = 0;
-let rejectedFrames = 0;
+let poseLandmarker = null;
+let drawingUtils = null;
+let detectionLoopActive = false;
+let isDetecting = false;
+let videoFrameCallbackId = null;
+let animationFrameId = null;
+let lastVideoTime = -1;
+let lastDetectionTimestamp = -Infinity;
+let completedDetections = 0;
+let fpsWindowStartedAt = 0;
+let firstResultReported = false;
 
-function showScreen(name) {
-  Object.entries(screens).forEach(([key, screen]) => {
-    screen.hidden = key !== name;
+function setStatus(message, state = "working") {
+  status.textContent = message;
+  status.dataset.state = state;
+}
+
+function resizeCanvasToVideo() {
+  if (video.videoWidth === 0 || video.videoHeight === 0) return;
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  cameraStage.style.aspectRatio = `${video.videoWidth} / ${video.videoHeight}`;
+  canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+async function startCamera() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    throw new Error("This browser does not support webcam access.");
+  }
+
+  setStatus("Requesting camera permission...");
+
+  stream = await navigator.mediaDevices.getUserMedia({
+    audio: false,
+    video: {
+      facingMode: "user",
+      width: { ideal: 640 },
+      height: { ideal: 480 },
+      frameRate: { ideal: 30, max: 30 },
+    },
+  });
+
+  const metadataReady = new Promise((resolve, reject) => {
+    video.addEventListener(
+      "loadedmetadata",
+      () => {
+        resizeCanvasToVideo();
+        resolve();
+      },
+      { once: true },
+    );
+    video.addEventListener("error", () => reject(new Error("The webcam stream could not be loaded.")), {
+      once: true,
+    });
+  });
+
+  video.srcObject = stream;
+  await metadataReady;
+  await video.play();
+
+  console.info(`[SahiRep] Camera ready: ${video.videoWidth}x${video.videoHeight}`);
+  setStatus("Camera ready. Loading pose model...");
+}
+
+async function loadPoseModel() {
+  const vision = await FilesetResolver.forVisionTasks(WASM_ROOT);
+
+  poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+    baseOptions: {
+      modelAssetPath: MODEL_URL,
+    },
+    runningMode: "VIDEO",
+    numPoses: 1,
+    minPoseDetectionConfidence: 0.5,
+    minPosePresenceConfidence: 0.5,
+    minTrackingConfidence: 0.5,
+    outputSegmentationMasks: false,
+  });
+
+  drawingUtils = new DrawingUtils(canvasContext);
+  console.info("[SahiRep] PoseLandmarker lite model loaded.");
+}
+
+function drawPoseResult(result) {
+  canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+
+  const landmarks = result.landmarks[0];
+  if (!landmarks) return;
+
+  drawingUtils.drawConnectors(landmarks, PoseLandmarker.POSE_CONNECTIONS, {
+    color: "#4ade80",
+    lineWidth: 4,
+  });
+  drawingUtils.drawLandmarks(landmarks, {
+    color: "#ffffff",
+    fillColor: "#4ade80",
+    lineWidth: 2,
+    radius: 3,
   });
 }
 
-function stopStream() {
-  if (stream) {
-    stream.getTracks().forEach((track) => track.stop());
-    stream = null;
+function updateDetectionRate() {
+  completedDetections += 1;
+  const now = performance.now();
+  const elapsed = now - fpsWindowStartedAt;
+
+  if (elapsed < 1000) return;
+
+  const fps = (completedDetections * 1000) / elapsed;
+  setStatus(`Detecting... ${fps.toFixed(1)} FPS`, "ready");
+  completedDetections = 0;
+  fpsWindowStartedAt = now;
+}
+
+function stopDetectionWithError(error) {
+  detectionLoopActive = false;
+  console.error("[SahiRep] Pose detection stopped:", error);
+  setStatus(`Error: ${error.message}`, "error");
+  startButton.disabled = false;
+  startButton.textContent = "Retry camera";
+}
+
+function processCurrentFrame() {
+  if (!detectionLoopActive || isDetecting || !poseLandmarker || video.readyState < 2) return;
+
+  isDetecting = true;
+  const timestamp = Math.max(performance.now(), lastDetectionTimestamp + 0.001);
+  lastDetectionTimestamp = timestamp;
+
+  try {
+    const result = poseLandmarker.detectForVideo(video, timestamp);
+
+    if (!detectionLoopActive) return;
+
+    drawPoseResult(result);
+    updateDetectionRate();
+
+    if (!firstResultReported) {
+      firstResultReported = true;
+      console.info("[SahiRep] Pose detection is running.");
+    }
+  } catch (error) {
+    stopDetectionWithError(error);
+  } finally {
+    isDetecting = false;
   }
-  video.srcObject = null;
-  video.classList.remove("live", "mirrored");
 }
 
-function stopSimulation() {
-  window.clearInterval(animationTimer);
-  window.clearInterval(fpsTimer);
-  animationTimer = null;
-  fpsTimer = null;
-}
+function scheduleNextFrame() {
+  if (!detectionLoopActive) return;
 
-function updatePose() {
-  const state = formStates[stateIndex % formStates.length];
-  document.documentElement.style.setProperty("--form-color", state.color);
-  poseBody.classList.toggle("squat", state.squat);
-
-  if (state.result === "clean") cleanFrames += 1;
-  if (state.result === "rejected") rejectedFrames += 1;
-  stateIndex += 1;
-}
-
-function startSimulation() {
-  stopSimulation();
-  stateIndex = 0;
-  cleanFrames = 0;
-  rejectedFrames = 0;
-  updatePose();
-  animationTimer = window.setInterval(updatePose, 1700);
-  fpsTimer = window.setInterval(() => {
-    fpsChip.textContent = `${(24 + Math.random() * 5).toFixed(1)} FPS`;
-  }, 850);
-}
-
-async function connectCamera() {
-  stopStream();
-  cameraMessage.hidden = true;
-
-  if (!navigator.mediaDevices?.getUserMedia) {
-    cameraMessage.textContent = "Camera unavailable. Showing the simulated preview feed.";
-    cameraMessage.hidden = false;
+  if (typeof video.requestVideoFrameCallback === "function") {
+    videoFrameCallbackId = video.requestVideoFrameCallback(handleVideoFrame);
     return;
   }
 
+  animationFrameId = window.requestAnimationFrame(handleAnimationFrame);
+}
+
+function handleVideoFrame() {
+  scheduleNextFrame();
+  processCurrentFrame();
+}
+
+function handleAnimationFrame() {
+  scheduleNextFrame();
+
+  if (video.currentTime === lastVideoTime) return;
+
+  lastVideoTime = video.currentTime;
+  processCurrentFrame();
+}
+
+function startDetectionLoop() {
+  detectionLoopActive = true;
+  lastVideoTime = -1;
+  lastDetectionTimestamp = -Infinity;
+  completedDetections = 0;
+  fpsWindowStartedAt = performance.now();
+  firstResultReported = false;
+  setStatus("Detecting...", "ready");
+  scheduleNextFrame();
+}
+
+function stopDetectionLoop() {
+  detectionLoopActive = false;
+
+  if (videoFrameCallbackId !== null && typeof video.cancelVideoFrameCallback === "function") {
+    video.cancelVideoFrameCallback(videoFrameCallbackId);
+  }
+  if (animationFrameId !== null) {
+    window.cancelAnimationFrame(animationFrameId);
+  }
+
+  videoFrameCallbackId = null;
+  animationFrameId = null;
+}
+
+function stopCamera() {
+  stopDetectionLoop();
+  stream?.getTracks().forEach((track) => track.stop());
+  stream = null;
+  video.srcObject = null;
+  canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+async function initializePreview() {
+  startButton.disabled = true;
+  startButton.textContent = "Starting...";
+
   try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: { facingMode: { ideal: facingMode } },
-    });
-    video.srcObject = stream;
-    video.classList.add("live");
-    video.classList.toggle("mirrored", facingMode === "user");
-    await video.play();
+    await startCamera();
+    await loadPoseModel();
+    startButton.textContent = "Camera running";
+    startDetectionLoop();
   } catch (error) {
-    cameraMessage.textContent = "Camera permission was not granted. Showing the simulated preview feed.";
-    cameraMessage.hidden = false;
+    stopCamera();
+    console.error("[SahiRep] Preview failed to start:", error);
+    setStatus(`Error: ${error.message}`, "error");
+    startButton.disabled = false;
+    startButton.textContent = "Retry camera";
   }
 }
 
-async function beginSet() {
-  showScreen("camera");
-  startSimulation();
-  await connectCamera();
-}
-
-function finishSet() {
-  stopSimulation();
-  stopStream();
-
-  const attempted = Math.max(1, cleanFrames + rejectedFrames);
-  const clean = cleanFrames;
-  const rejected = Math.max(0, attempted - clean);
-  const score = (clean / attempted) * 100;
-
-  document.querySelector("#attempted-value").textContent = String(attempted);
-  document.querySelector("#clean-value").textContent = String(clean);
-  document.querySelector("#rejected-value").textContent = String(rejected);
-  document.querySelector("#score-value").textContent = `${score.toFixed(1)}%`;
-  document.querySelector("#reason-value").textContent = rejected > 0 ? "Squat depth" : "None";
-  showScreen("summary");
-}
-
-grantCamera.addEventListener("click", beginSet);
-endSet.addEventListener("click", finishSet);
-startNewSet.addEventListener("click", beginSet);
-switchCamera.addEventListener("click", async () => {
-  facingMode = facingMode === "user" ? "environment" : "user";
-  await connectCamera();
-});
-
-window.addEventListener("beforeunload", () => {
-  stopSimulation();
-  stopStream();
+startButton.addEventListener("click", initializePreview);
+window.addEventListener("pagehide", () => {
+  stopCamera();
+  poseLandmarker?.close();
+  poseLandmarker = null;
 });

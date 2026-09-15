@@ -18,6 +18,7 @@ enum class RepRejectionReason(val label: String) {
     NOT_DEEP_ENOUGH("not deep enough"),
     KNEE_CAVING_IN("knee caving in"),
     TOO_FAST("too fast"),
+    BODY_LINE_OUT_OF_ALIGNMENT("body line out of alignment"),
 }
 
 data class RepSetProgress(
@@ -29,6 +30,7 @@ data class RepSetProgress(
 )
 
 data class RepSetSummary(
+    val exerciseType: ExerciseType,
     val attemptedReps: Int,
     val cleanReps: Int,
     val rejectedReps: Int,
@@ -37,20 +39,22 @@ data class RepSetSummary(
     val rejectionReasons: List<String>,
 )
 
-class RepCounter {
+class RepCounter(private val config: ExerciseConfig = SquatExerciseConfig) {
     private var movementState = RepMovementState.STANDING
     private var pendingState: RepMovementState? = null
     private var pendingFrames = 0
     private var cycleStartedAtMillis: Long? = null
     private var downPhaseMillis: Long? = null
-    private var reachedGreenDepth = false
-    private var sawRedValgus = false
+    private var reachedCleanDepth = false
+    private var maximumBodyDeviationDegrees: Float? = null
+    private var maximumKneeValgusOffset: Float? = null
     private var attemptedReps = 0
     private var cleanReps = 0
     private val rejectionReasons = mutableListOf<String>()
 
-    fun onFrame(form: SquatFormResult, timestampMillis: Long): RepSetProgress {
-        val angle = form.worstKneeAngle()
+    fun onFrame(analysis: ExerciseAnalysis, timestampMillis: Long): RepSetProgress {
+        if (analysis.exerciseType != config.type) return progress()
+        val angle = analysis.movementAngleDegrees
         if (angle == null) {
             if (movementState == RepMovementState.STANDING) resetCycle()
             clearPendingTransition()
@@ -65,7 +69,7 @@ class RepCounter {
         ) {
             startCycle(timestampMillis)
         }
-        if (cycleStartedAtMillis != null) observeCycle(form)
+        if (cycleStartedAtMillis != null) observeCycle(analysis)
 
         if (targetState == null) {
             if (movementState == RepMovementState.STANDING) resetCycle()
@@ -79,7 +83,7 @@ class RepCounter {
             pendingState = targetState
             pendingFrames = 1
         }
-        if (pendingFrames >= TRANSITION_CONFIRMATION_FRAMES) {
+        if (pendingFrames >= config.repRules.transitionFrames) {
             transitionTo(targetState, timestampMillis)
             clearPendingTransition()
         }
@@ -88,6 +92,7 @@ class RepCounter {
 
     fun endSet(): RepSetSummary {
         val summary = RepSetSummary(
+            exerciseType = config.type,
             attemptedReps = attemptedReps,
             cleanReps = cleanReps,
             rejectedReps = attemptedReps - cleanReps,
@@ -107,21 +112,24 @@ class RepCounter {
         rejectionReasons = rejectionReasons.toList(),
     )
 
-    private fun targetState(angle: Float): RepMovementState? = when (movementState) {
+    private fun targetState(angle: Float): RepMovementState? {
+        val rules = config.repRules
+        return when (movementState) {
         RepMovementState.STANDING ->
-            RepMovementState.DESCENDING.takeIf { angle <= DESCENDING_START_MAX_DEGREES }
+            RepMovementState.DESCENDING.takeIf { angle <= rules.loweringStartDegrees }
 
         RepMovementState.DESCENDING -> when {
-            angle <= BOTTOM_ENTRY_MAX_DEGREES -> RepMovementState.BOTTOM
-            angle >= STANDING_MIN_DEGREES -> RepMovementState.STANDING
+            angle <= rules.bottomEntryDegrees -> RepMovementState.BOTTOM
+            angle >= rules.lockoutDegrees -> RepMovementState.STANDING
             else -> null
         }
 
         RepMovementState.BOTTOM ->
-            RepMovementState.ASCENDING.takeIf { angle >= ASCENDING_START_MIN_DEGREES }
+            RepMovementState.ASCENDING.takeIf { angle >= rules.ascendingStartDegrees }
 
         RepMovementState.ASCENDING ->
-            RepMovementState.STANDING.takeIf { angle >= STANDING_MIN_DEGREES }
+            RepMovementState.STANDING.takeIf { angle >= rules.lockoutDegrees }
+        }
     }
 
     private fun transitionTo(next: RepMovementState, timestampMillis: Long) {
@@ -145,28 +153,33 @@ class RepCounter {
     private fun startCycle(timestampMillis: Long) {
         cycleStartedAtMillis = timestampMillis
         downPhaseMillis = null
-        reachedGreenDepth = false
-        sawRedValgus = false
+        reachedCleanDepth = false
+        maximumBodyDeviationDegrees = null
+        maximumKneeValgusOffset = null
     }
 
-    private fun observeCycle(form: SquatFormResult) {
-        if (form.state == SquatFormState.GREEN) reachedGreenDepth = true
-        val leftValgus = form.leftKneeValgusOffset ?: 0f
-        val rightValgus = form.rightKneeValgusOffset ?: 0f
-        if (leftValgus >= RED_KNEE_VALGUS_OFFSET || rightValgus >= RED_KNEE_VALGUS_OFFSET) {
-            sawRedValgus = true
-        }
+    private fun observeCycle(analysis: ExerciseAnalysis) {
+        if (config.isCleanDepth(analysis)) reachedCleanDepth = true
+        maximumBodyDeviationDegrees = maxNullable(
+            maximumBodyDeviationDegrees,
+            analysis.bodyDeviationDegrees,
+        )
+        maximumKneeValgusOffset = maxNullable(
+            maximumKneeValgusOffset,
+            analysis.maxKneeValgusOffset,
+        )
     }
 
     private fun completeRep() {
         attemptedReps += 1
-        val reasons = buildList {
-            if (!reachedGreenDepth) add(RepRejectionReason.NOT_DEEP_ENOUGH.label)
-            if (sawRedValgus) add(RepRejectionReason.KNEE_CAVING_IN.label)
-            if ((downPhaseMillis ?: 0L) < MIN_DOWN_PHASE_MILLIS) {
-                add(RepRejectionReason.TOO_FAST.label)
-            }
-        }
+        val reasons = config.rejectionReasons(
+            RepCycleEvidence(
+                reachedCleanDepth = reachedCleanDepth,
+                maximumBodyDeviationDegrees = maximumBodyDeviationDegrees,
+                maximumKneeValgusOffset = maximumKneeValgusOffset,
+                downPhaseMillis = downPhaseMillis,
+            ),
+        )
         if (reasons.isEmpty()) cleanReps += 1 else rejectionReasons += reasons
         resetCycle()
     }
@@ -180,8 +193,9 @@ class RepCounter {
     private fun resetCycle() {
         cycleStartedAtMillis = null
         downPhaseMillis = null
-        reachedGreenDepth = false
-        sawRedValgus = false
+        reachedCleanDepth = false
+        maximumBodyDeviationDegrees = null
+        maximumKneeValgusOffset = null
     }
 
     private fun resetSet() {
@@ -198,9 +212,9 @@ class RepCounter {
         pendingFrames = 0
     }
 
-    private fun SquatFormResult.worstKneeAngle(): Float? {
-        val left = leftKneeAngleDegrees ?: return null
-        val right = rightKneeAngleDegrees ?: return null
-        return maxOf(left, right).takeIf { it.isFinite() }
+    private fun maxNullable(current: Float?, next: Float?): Float? = when {
+        next == null || !next.isFinite() -> current
+        current == null -> next
+        else -> maxOf(current, next)
     }
 }

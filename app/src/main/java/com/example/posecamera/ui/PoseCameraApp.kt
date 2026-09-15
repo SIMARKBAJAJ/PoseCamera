@@ -9,10 +9,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -26,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,20 +37,74 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.example.posecamera.camera.CameraSession
+import com.example.posecamera.network.ApiResult
+import com.example.posecamera.network.SahiRepRepository
+import com.example.posecamera.pose.ExerciseConfig
 import com.example.posecamera.pose.PoseEngine
 import com.example.posecamera.pose.PoseFrame
+import com.example.posecamera.pose.PushUpExerciseConfig
 import com.example.posecamera.pose.RepCounter
 import com.example.posecamera.pose.RepSetSummary
+import com.example.posecamera.pose.SquatExerciseConfig
 import java.util.Locale
 import java.util.concurrent.Executors
+import kotlinx.coroutines.launch
 
 @Composable
 fun PoseCameraApp() {
+    val context = LocalContext.current
+    val repository = remember(context) { SahiRepRepository(context) }
+    val coroutineScope = rememberCoroutineScope()
+    var authenticated by remember { mutableStateOf(repository.hasSession()) }
+    var authLoading by remember { mutableStateOf(false) }
+    var authError by remember { mutableStateOf<String?>(null) }
+
+    if (!authenticated) {
+        AuthScreen(
+            isLoading = authLoading,
+            errorMessage = authError,
+            onSubmit = { mode, username, password ->
+                coroutineScope.launch {
+                    authLoading = true
+                    val result: ApiResult<Unit> = when (mode) {
+                        AuthMode.LOGIN -> repository.login(username, password)
+                        AuthMode.REGISTER -> when (val registration = repository.register(username, password)) {
+                            is ApiResult.Success -> repository.login(username, password)
+                            is ApiResult.Failure -> registration
+                        }
+                    }
+                    when (result) {
+                        is ApiResult.Success -> authenticated = true
+                        is ApiResult.Failure -> authError = result.message
+                    }
+                    authLoading = false
+                }
+            },
+            onClearError = { authError = null },
+        )
+        return
+    }
+
+    CameraPermissionGate(
+        repository = repository,
+        onSessionExpired = { message ->
+            authError = message
+            authenticated = false
+        },
+    )
+}
+
+@Composable
+private fun CameraPermissionGate(
+    repository: SahiRepRepository,
+    onSessionExpired: (String) -> Unit,
+) {
     val context = LocalContext.current
     var granted by remember {
         mutableStateOf(
@@ -67,28 +125,34 @@ fun PoseCameraApp() {
     }
 
     if (granted) {
-        CameraContent()
+        CameraContent(repository, onSessionExpired)
     } else {
         PermissionContent { launcher.launch(Manifest.permission.CAMERA) }
     }
 }
 
 @Composable
-private fun CameraContent() {
+private fun CameraContent(
+    repository: SahiRepRepository,
+    onSessionExpired: (String) -> Unit,
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var frame by remember { mutableStateOf<PoseFrame?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var summary by remember { mutableStateOf<RepSetSummary?>(null) }
-    val repCounter = remember { RepCounter() }
+    var activeConfig by remember { mutableStateOf<ExerciseConfig>(SquatExerciseConfig) }
+    var repCounter by remember { mutableStateOf(RepCounter(activeConfig)) }
     val executor = remember { Executors.newSingleThreadExecutor() }
     val poseEngine = remember(context, executor) {
         PoseEngine(
             context,
             executor,
             {
-                frame = it
-                if (summary == null) repCounter.onFrame(it.squatForm, it.timestampMillis)
+                if (it.analysis.exerciseType == activeConfig.type) {
+                    frame = it
+                    if (summary == null) repCounter.onFrame(it.analysis, it.timestampMillis)
+                }
             },
             { error = it },
         )
@@ -109,6 +173,9 @@ private fun CameraContent() {
     if (currentSummary != null) {
         SetSummaryScreen(
             summary = currentSummary,
+            uploadSet = repository::submitSet,
+            loadHistory = repository::getHistory,
+            onSessionExpired = onSessionExpired,
             onStartNewSet = {
                 summary = null
                 frame = null
@@ -129,6 +196,37 @@ private fun CameraContent() {
             modifier = Modifier.fillMaxSize(),
         )
         PoseOverlay(frame)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .statusBarsPadding()
+                .padding(16.dp),
+        ) {
+            ExerciseSelector(
+                activeConfig = activeConfig,
+                onSelected = { config ->
+                    if (config.type != activeConfig.type) {
+                        poseEngine.setActiveConfig(config)
+                        activeConfig = config
+                        repCounter = RepCounter(config)
+                        frame = null
+                        error = null
+                    }
+                },
+            )
+            activeConfig.guidance?.let { guidance ->
+                Text(
+                    text = guidance,
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .background(Color.Black.copy(alpha = 0.56f), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 10.dp, vertical = 7.dp),
+                )
+            }
+        }
         Text(
             text = String.format(Locale.US, "%.1f FPS", frame?.fps ?: 0f),
             color = Color.White,
@@ -182,6 +280,38 @@ private fun CameraContent() {
                     .padding(20.dp)
                     .background(Color.Black.copy(alpha = 0.72f), RoundedCornerShape(8.dp))
                     .padding(10.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ExerciseSelector(
+    activeConfig: ExerciseConfig,
+    onSelected: (ExerciseConfig) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .background(Color.Black.copy(alpha = 0.56f), RoundedCornerShape(8.dp))
+            .selectableGroup(),
+    ) {
+        listOf(SquatExerciseConfig, PushUpExerciseConfig).forEach { config ->
+            val selected = config.type == activeConfig.type
+            Text(
+                text = config.type.displayLabel,
+                color = if (selected) Color.Black else Color.White,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier
+                    .background(
+                        color = if (selected) Color.White else Color.Transparent,
+                        shape = RoundedCornerShape(8.dp),
+                    )
+                    .selectable(
+                        selected = selected,
+                        onClick = { onSelected(config) },
+                        role = Role.RadioButton,
+                    )
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
             )
         }
     }

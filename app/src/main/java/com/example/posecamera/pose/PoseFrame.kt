@@ -13,6 +13,6 @@ data class PoseFrame(
     val imageHeight: Int,
     val fps: Float,
     val mirrorHorizontally: Boolean,
-    val squatForm: SquatFormResult,
+    val analysis: ExerciseAnalysis,
     val timestampMillis: Long,
 )
