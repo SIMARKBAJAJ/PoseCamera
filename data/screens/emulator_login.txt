@@ -1,0 +1,3 @@
+username: demo168f7
+password: f7db3335ae5f0fa8
+note: throwaway account on the emulator backend copy; gone when the backend script is rerun

@@ -1,6 +1,7 @@
 package com.example.posecamera.camera
 
 import android.content.Context
+import android.os.SystemClock
 import android.util.Size
 import android.view.Surface
 import androidx.camera.core.CameraSelector
@@ -15,6 +16,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import androidx.lifecycle.LifecycleOwner
 import com.example.posecamera.pose.PoseEngine
+import com.example.posecamera.power.FrameThrottle
+import com.example.posecamera.power.PowerPolicy
+import com.example.posecamera.power.Resolution
 import java.util.concurrent.ExecutorService
 
 class CameraSession(
@@ -29,6 +33,9 @@ class CameraSession(
     private var previewView: PreviewView? = null
     private var activeAnalysis: ImageAnalysis? = null
     private var lensFacing = CameraSelector.LENS_FACING_FRONT
+    private var policy = PowerPolicy.NORMAL
+    private var boundResolution: Resolution? = null
+    private val throttle = FrameThrottle()
 
     fun attach(view: PreviewView) {
         previewView = view
@@ -47,6 +54,13 @@ class CameraSession(
             },
             ContextCompat.getMainExecutor(appContext),
         )
+    }
+
+    /** Main thread. The fps cap applies immediately; a new resolution rebinds the camera. */
+    fun applyPolicy(newPolicy: PowerPolicy) {
+        policy = newPolicy
+        throttle.setCap(newPolicy.analysisFpsCap)
+        if (newPolicy.analysisResolution != boundResolution) bind()
     }
 
     fun toggleLens() {
@@ -97,14 +111,25 @@ class CameraSession(
             .setResolutionSelector(resolution)
             .build()
             .also { it.surfaceProvider = view.surfaceProvider }
+        val target = policy.analysisResolution
+        val analysisResolution = ResolutionSelector.Builder()
+            .setResolutionStrategy(
+                ResolutionStrategy(
+                    Size(target.width, target.height),
+                    ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER,
+                ),
+            ).build()
+        boundResolution = target
         val analysis = ImageAnalysis.Builder()
             .setTargetRotation(rotation)
-            .setResolutionSelector(resolution)
+            .setResolutionSelector(analysisResolution)
             .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .build()
         val isFront = lensFacing == CameraSelector.LENS_FACING_FRONT
-        analysis.setAnalyzer(executor) { image -> poseEngine.process(image, isFront) }
+        analysis.setAnalyzer(executor) { image ->
+            if (throttle.allow(SystemClock.uptimeMillis())) poseEngine.process(image, isFront) else image.close()
+        }
         val useCaseGroup = UseCaseGroup.Builder()
             .addUseCase(preview)
             .addUseCase(analysis)

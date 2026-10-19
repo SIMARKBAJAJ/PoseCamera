@@ -1,5 +1,7 @@
 package com.example.posecamera.network
 
+import com.example.posecamera.BuildConfig
+
 object BackendConfig {
-    const val BASE_URL = "http://192.168.1.12:5000/"
+    const val BASE_URL = BuildConfig.BASE_URL
 }

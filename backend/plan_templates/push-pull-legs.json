@@ -1,0 +1,34 @@
+{
+  "plans": [
+    {"slug": "tpl-push-pull-legs-6x", "name": "Push / Pull / Legs (gym)",
+     "level": "intermediate", "goal": "hypertrophy", "days_per_week": 6, "split": "push_pull_legs",
+     "verified": false,
+     "notes": "Rotation Push, Pull, Legs, run twice per week (6 days). Stay 1-2 reps from failure on compounds; progress reps then load.",
+     "evidence_notes": ["Set/rep/rest/RIR values are conventional hypertrophy choices, not sourced; check before marking verified."],
+     "sources": [],
+     "days": [
+       {"name": "Push", "slots": [
+         {"movement_pattern": "horizontal_push", "muscles": ["chest"], "sets": 4, "rep_min": 6, "rep_max": 10, "rest_s": 150, "rir": 2},
+         {"movement_pattern": "vertical_push", "muscles": ["shoulders"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 120, "rir": 2},
+         {"movement_pattern": "chest_fly", "muscles": ["chest"], "sets": 3, "rep_min": 10, "rep_max": 15, "rest_s": 75, "rir": 1},
+         {"movement_pattern": "lateral_raise", "muscles": ["shoulders"], "sets": 3, "rep_min": 12, "rep_max": 15, "rest_s": 75, "rir": 1},
+         {"movement_pattern": "elbow_extension", "muscles": ["triceps"], "sets": 3, "rep_min": 10, "rep_max": 15, "rest_s": 75, "rir": 1}
+       ]},
+       {"name": "Pull", "slots": [
+         {"movement_pattern": "vertical_pull", "muscles": ["back"], "sets": 4, "rep_min": 6, "rep_max": 10, "rest_s": 150, "rir": 2},
+         {"movement_pattern": "horizontal_pull", "muscles": ["back"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 120, "rir": 2},
+         {"movement_pattern": "rear_delt", "muscles": ["shoulders"], "sets": 3, "rep_min": 12, "rep_max": 15, "rest_s": 75, "rir": 1},
+         {"movement_pattern": "elbow_flexion", "muscles": ["biceps"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 75, "rir": 1},
+         {"movement_pattern": "shrug", "muscles": ["back"], "sets": 2, "rep_min": 10, "rep_max": 15, "rest_s": 75, "rir": 1}
+       ]},
+       {"name": "Legs", "slots": [
+         {"movement_pattern": "squat", "muscles": ["quadriceps"], "sets": 4, "rep_min": 6, "rep_max": 10, "rest_s": 180, "rir": 2},
+         {"movement_pattern": "hinge", "muscles": ["hamstrings"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 150, "rir": 2},
+         {"movement_pattern": "lunge", "muscles": ["quadriceps", "glutes"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 90, "rir": 2},
+         {"movement_pattern": "knee_flexion", "muscles": ["hamstrings"], "sets": 3, "rep_min": 10, "rep_max": 15, "rest_s": 75, "rir": 1},
+         {"movement_pattern": "calf_raise", "muscles": ["calves"], "sets": 4, "rep_min": 10, "rep_max": 15, "rest_s": 60, "rir": 1},
+         {"movement_pattern": "core_flexion", "muscles": ["abdominals"], "sets": 3, "rep_min": 10, "rep_max": 15, "rest_s": 60, "rir": 1}
+       ]}
+     ]}
+  ]
+}

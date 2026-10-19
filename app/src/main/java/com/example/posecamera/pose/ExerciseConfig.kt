@@ -1,8 +1,31 @@
 package com.example.posecamera.pose
 
-enum class ExerciseType(val displayLabel: String) {
+/** [lift] = declared as data in the lifts package (baseline-relative, rep counting + cues only). */
+enum class ExerciseType(val displayLabel: String, val lift: Boolean = false) {
     SQUAT("Squat"),
     PUSH_UP("Push-up"),
+    LUNGE("Lunge", true),
+    DEADLIFT("Deadlift", true),
+    ROMANIAN_DEADLIFT("Romanian deadlift", true),
+    OVERHEAD_PRESS("Overhead press", true),
+    BENT_OVER_ROW("Bent-over row", true),
+    BICEPS_CURL("Biceps curl", true),
+    GLUTE_BRIDGE("Glute bridge", true),
+    PLANK("Plank", true),
+    GOBLET_SQUAT("Goblet squat", true),
+    BARBELL_SQUAT("Barbell squat", true),
+    BENCH_PRESS("Bench press", true),
+    SEATED_CABLE_ROW("Seated cable row", true),
+    PULL_UP("Pull-up / chin-up", true),
+    LAT_PULLDOWN("Lat pulldown", true),
+    TRICEPS_PUSHDOWN("Triceps pushdown", true),
+    LATERAL_RAISE("Lateral raise", true),
+    LEG_PRESS("Leg press", true),
+    LEG_CURL("Leg curl", true),
+    CALF_RAISE("Calf raise", true),
+    CRUNCH("Crunch / sit-up", true),
+    FACE_PULL("Face pull", true),
+    STEP_UP("Step-up", true),
 }
 
 enum class FormState {

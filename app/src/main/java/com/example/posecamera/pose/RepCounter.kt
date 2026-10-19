@@ -37,6 +37,13 @@ data class RepSetSummary(
     val formScore: Float,
     val mostCommonRejectionReason: String?,
     val rejectionReasons: List<String>,
+    /** Lifts only: reps counted (attemptedReps is then the pose-JUDGED subset). */
+    val totalReps: Int = attemptedReps,
+    /** Plank only: seconds held. Null for rep-based sets. */
+    val holdSeconds: Float? = null,
+    /** Lifts only: body parts that could not be seen well enough to judge. */
+    val cannotSee: List<String> = emptyList(),
+    val catalogSlug: String? = null,
 )
 
 class RepCounter(private val config: ExerciseConfig = SquatExerciseConfig) {

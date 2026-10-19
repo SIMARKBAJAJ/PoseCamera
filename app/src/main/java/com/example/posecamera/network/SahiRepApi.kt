@@ -25,12 +25,23 @@ data class SubmitSetRequest(
     val formscore: Float,
 )
 
+/** Lifts upload as exercise_type "other"; form fields stay null unless every counted rep was pose-judged. */
+data class SubmitLiftSetRequest(
+    @SerializedName("exercise_type") val exerciseType: String,
+    @SerializedName("exercise_slug") val exerciseSlug: String,
+    @SerializedName("rep_count") val repCount: Int,
+    @SerializedName("clean_count") val cleanCount: Int?,
+    @SerializedName("attempted_count") val attemptedCount: Int?,
+    val formscore: Float?,
+)
+
 data class SyncedSet(
     @SerializedName("exercise_type") val exerciseType: String,
+    @SerializedName("exercise_slug") val exerciseSlug: String?,
     @SerializedName("rep_count") val repCount: Int,
-    @SerializedName("clean_count") val cleanCount: Int,
-    @SerializedName("attempted_count") val attemptedCount: Int,
-    val formscore: Float,
+    @SerializedName("clean_count") val cleanCount: Int?,
+    @SerializedName("attempted_count") val attemptedCount: Int?,
+    val formscore: Float?,
     val timestamp: String,
 )
 
@@ -49,6 +60,9 @@ interface SahiRepApi {
     @POST("api/sets")
     suspend fun submitSet(@Body request: SubmitSetRequest): Response<Unit>
 
+    @POST("api/sets")
+    suspend fun submitLiftSet(@Body request: SubmitLiftSetRequest): Response<Unit>
+
     @GET("api/history")
     suspend fun getHistory(): Response<HistoryResponse>
 }
@@ -57,9 +71,23 @@ fun RepSetSummary.toSubmitSetRequest() = SubmitSetRequest(
     exerciseType = when (exerciseType) {
         ExerciseType.SQUAT -> "squat"
         ExerciseType.PUSH_UP -> "push-up"
+        else -> throw IllegalArgumentException("$exerciseType uses toSubmitLiftSetRequest")
     },
     repCount = attemptedReps,
     cleanCount = cleanReps,
     attemptedCount = rejectedReps,
     formscore = formScore,
 )
+
+fun RepSetSummary.toSubmitLiftSetRequest(): SubmitLiftSetRequest {
+    // The server requires clean + attempted == rep_count; unjudged reps (baseline, unseen) must not be faked.
+    val allJudged = totalReps > 0 && attemptedReps == totalReps
+    return SubmitLiftSetRequest(
+        exerciseType = "other",
+        exerciseSlug = requireNotNull(catalogSlug) { "lift summary has no catalog slug" },
+        repCount = totalReps,
+        cleanCount = cleanReps.takeIf { allJudged },
+        attemptedCount = rejectedReps.takeIf { allJudged },
+        formscore = formScore.takeIf { allJudged },
+    )
+}

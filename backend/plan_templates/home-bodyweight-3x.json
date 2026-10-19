@@ -1,0 +1,33 @@
+{
+  "plans": [
+    {"slug": "tpl-home-bodyweight-3x", "name": "Home Bodyweight 3x (no equipment)",
+     "level": "beginner", "goal": "general", "days_per_week": 3, "split": "full_body",
+     "verified": false,
+     "notes": "No equipment: resolve with equipment=bodyweight. Progress by adding reps, slowing tempo or using harder variations.",
+     "evidence_notes": ["Set/rep/rest/RIR values are conventional beginner choices, not sourced; check before marking verified."],
+     "sources": [],
+     "days": [
+       {"name": "Full body A", "slots": [
+         {"movement_pattern": "squat", "muscles": ["quadriceps"], "sets": 3, "rep_min": 10, "rep_max": 20, "rest_s": 75, "rir": 3, "difficulty_max": "intermediate"},
+         {"movement_pattern": "horizontal_push", "muscles": ["chest"], "sets": 3, "rep_min": 6, "rep_max": 15, "rest_s": 75, "rir": 3, "difficulty_max": "intermediate"},
+         {"movement_pattern": "hinge", "muscles": ["glutes"], "sets": 3, "rep_min": 10, "rep_max": 20, "rest_s": 75, "rir": 3, "difficulty_max": "intermediate"},
+         {"movement_pattern": "horizontal_push", "muscles": ["triceps"], "sets": 2, "rep_min": 6, "rep_max": 12, "rest_s": 75, "rir": 3, "difficulty_max": "intermediate"},
+         {"movement_pattern": "core_stability", "muscles": ["abdominals"], "sets": 3, "rep_min": 10, "rep_max": 20, "rest_s": 45, "rir": 2, "difficulty_max": "intermediate"}
+       ]},
+       {"name": "Full body B", "slots": [
+         {"movement_pattern": "lunge", "muscles": ["quadriceps", "glutes"], "sets": 3, "rep_min": 8, "rep_max": 15, "rest_s": 75, "rir": 3, "difficulty_max": "intermediate"},
+         {"movement_pattern": "horizontal_push", "muscles": ["chest"], "sets": 3, "rep_min": 6, "rep_max": 15, "rest_s": 75, "rir": 3, "difficulty_max": "intermediate"},
+         {"movement_pattern": "vertical_pull", "muscles": ["back"], "sets": 3, "rep_min": 5, "rep_max": 12, "rest_s": 90, "rir": 3, "difficulty_max": "intermediate"},
+         {"movement_pattern": "elbow_extension", "muscles": ["triceps"], "sets": 2, "rep_min": 8, "rep_max": 15, "rest_s": 60, "rir": 2, "difficulty_max": "intermediate"},
+         {"movement_pattern": "core_flexion", "muscles": ["abdominals"], "sets": 3, "rep_min": 10, "rep_max": 20, "rest_s": 45, "rir": 2, "difficulty_max": "intermediate"}
+       ]},
+       {"name": "Full body C", "slots": [
+         {"movement_pattern": "squat", "muscles": ["quadriceps"], "sets": 3, "rep_min": 10, "rep_max": 20, "rest_s": 75, "rir": 3, "difficulty_max": "intermediate"},
+         {"movement_pattern": "horizontal_push", "muscles": ["chest"], "sets": 3, "rep_min": 6, "rep_max": 15, "rest_s": 75, "rir": 3, "difficulty_max": "intermediate"},
+         {"movement_pattern": "hip_extension", "muscles": ["glutes"], "sets": 3, "rep_min": 10, "rep_max": 20, "rest_s": 60, "rir": 2, "difficulty_max": "intermediate"},
+         {"movement_pattern": "vertical_pull", "muscles": ["back"], "sets": 2, "rep_min": 5, "rep_max": 12, "rest_s": 90, "rir": 3, "difficulty_max": "intermediate"},
+         {"movement_pattern": "core_stability", "muscles": ["abdominals"], "sets": 3, "rep_min": 10, "rep_max": 20, "rest_s": 45, "rir": 2, "difficulty_max": "intermediate"}
+       ]}
+     ]}
+  ]
+}

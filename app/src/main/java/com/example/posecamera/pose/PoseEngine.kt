@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import androidx.camera.core.ImageProxy
+import com.example.posecamera.power.PowerPolicy
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.core.Delegate
@@ -39,6 +40,9 @@ class PoseEngine(
     private var closeFinalized = false
     @Volatile
     private var activeConfig = initialConfig
+    @Volatile
+    private var useGpu = true
+    private var createdWithGpu = true
 
     fun setActiveConfig(config: ExerciseConfig) {
         activeConfig = config
@@ -55,10 +59,29 @@ class PoseEngine(
         if (closed.get()) return
         if (initializationAttempted) return
         initializationAttempted = true
-        landmarker = runCatching { create(Delegate.GPU) }
+        createLandmarker()
+    }
+
+    private fun createLandmarker() {
+        val gpu = useGpu
+        createdWithGpu = gpu // recorded even if GPU falls back to CPU, so we never retry in a loop
+        landmarker = runCatching { create(if (gpu) Delegate.GPU else Delegate.CPU) }
             .recoverCatching { create(Delegate.CPU) }
             .onFailure { reportError(it.message ?: "Pose model could not start") }
             .getOrNull()
+    }
+
+    /** Delegate changes only happen here, on the executor, never while a frame is in flight. */
+    private fun recreateIfNeeded() {
+        if (closed.get() || inferenceInFlight || landmarker == null || useGpu == createdWithGpu) return
+        landmarker?.close()
+        landmarker = null
+        createLandmarker()
+    }
+
+    fun setPolicy(policy: PowerPolicy) {
+        useGpu = policy.useGpuDelegate
+        submitInternal { recreateIfNeeded() }
     }
 
     private fun create(delegate: Delegate): PoseLandmarker {
@@ -105,6 +128,7 @@ class PoseEngine(
                             )
                         }
                     }
+                    recreateIfNeeded()
                     finalizeCloseIfReady()
                 }
             }
@@ -113,6 +137,7 @@ class PoseEngine(
                     pendingFrame = null
                     inferenceInFlight = false
                     if (!closed.get()) reportError(it.message ?: "Pose inference failed")
+                    recreateIfNeeded()
                     finalizeCloseIfReady()
                 }
             }
@@ -264,6 +289,7 @@ class PoseEngine(
     companion object {
         private const val MODEL_FILE = "pose_landmarker_lite.task"
         private const val BYTES_PER_PIXEL = 4
+        const val LANDMARK_COUNT = 33
         val connections: List<Pair<Int, Int>> = PoseLandmarker.POSE_LANDMARKS.map {
             it.start() to it.end()
         }

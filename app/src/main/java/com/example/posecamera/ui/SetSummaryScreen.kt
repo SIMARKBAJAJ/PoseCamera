@@ -26,8 +26,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.posecamera.network.ApiResult
 import com.example.posecamera.network.HistoryResponse
+import com.example.posecamera.network.NO_REPS_MESSAGE
+import com.example.posecamera.sync.SaveResult
+import com.example.posecamera.sync.saveBlocker
 import com.example.posecamera.network.SyncedSet
+import com.example.posecamera.lifts.FORM_DISCLAIMER
 import com.example.posecamera.pose.RepSetSummary
+import com.example.posecamera.ui.design.ScoreRing
+import com.example.posecamera.ui.train.rowScore
+import com.example.posecamera.ui.train.scoreBand
+import com.example.posecamera.ui.train.setScore
+import com.example.posecamera.ui.train.topFaults
 import java.util.Locale
 
 @Composable
@@ -43,20 +52,25 @@ fun SetSummaryScreen(
     var isSyncing by remember(summary) { mutableStateOf(true) }
     var syncFailed by remember(summary) { mutableStateOf(false) }
     var loginRequired by remember(summary) { mutableStateOf(false) }
-    var syncMessage by remember(summary) { mutableStateOf("Uploading set...") }
+    var syncMessage by remember(summary) { mutableStateOf("Saving set...") }
     var history by remember(summary) { mutableStateOf<HistoryResponse?>(null) }
 
     LaunchedEffect(summary, retryKey) {
         isSyncing = true
         syncFailed = false
         loginRequired = false
-        syncMessage = if (setUploaded) "Refreshing history..." else "Uploading set..."
+        notUploadable(summary)?.let {
+            syncMessage = it
+            isSyncing = false
+            return@LaunchedEffect
+        }
+        syncMessage = if (setUploaded) "Refreshing history..." else "Saving set..."
 
         if (!setUploaded) {
             when (val result = uploadSet(summary)) {
                 is ApiResult.Success -> setUploaded = true
                 is ApiResult.Failure -> {
-                    syncMessage = "Not synced. ${result.message}"
+                    syncMessage = "Not saved. ${result.message}"
                     syncFailed = true
                     loginRequired = result.requiresLogin
                     isSyncing = false
@@ -68,11 +82,11 @@ fun SetSummaryScreen(
         when (val result = loadHistory()) {
             is ApiResult.Success -> {
                 history = result.value
-                syncMessage = "Set synced"
+                syncMessage = "Set saved"
             }
 
             is ApiResult.Failure -> {
-                syncMessage = "Set synced. ${result.message}"
+                syncMessage = "Set saved. ${result.message}"
                 syncFailed = true
                 loginRequired = result.requiresLogin
             }
@@ -93,11 +107,33 @@ fun SetSummaryScreen(
             color = Color.White,
             style = MaterialTheme.typography.headlineMedium,
         )
-        SummaryValue("Attempted", summary.attemptedReps.toString())
-        SummaryValue("Clean", summary.cleanReps.toString())
-        SummaryValue("Rejected", summary.rejectedReps.toString())
-        SummaryValue("FormScore", String.format(Locale.US, "%.1f%%", summary.formScore))
-        SummaryValue("Most common rejection", summary.mostCommonRejectionReason ?: "None")
+        if (summary.holdSeconds != null) {
+            SummaryValue("Hold", String.format(Locale.US, "%.0f s", summary.holdSeconds))
+        } else if (summary.exerciseType.lift) {
+            SummaryValue("Reps counted", summary.totalReps.toString())
+        }
+        if (summary.holdSeconds == null && (!summary.exerciseType.lift || summary.attemptedReps > 0)) {
+            SummaryValue(if (summary.exerciseType.lift) "Judged" else "Attempted", summary.attemptedReps.toString())
+            SummaryValue("Clean", summary.cleanReps.toString())
+            SummaryValue("Rejected (lowers score)", summary.rejectedReps.toString())
+            val score = setScore(summary)
+            Text("SET SCORE", color = Color.LightGray, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 20.dp))
+            ScoreRing(score)
+            Text(score?.let { scoreBand(it).label } ?: "No score", color = Color.LightGray, style = MaterialTheme.typography.bodySmall)
+            topFaults(summary.rejectionReasons).takeIf { it.isNotEmpty() }?.let { faults ->
+                Text("TOP FAULTS", color = Color.LightGray, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 16.dp))
+                faults.forEach { (reason, n) -> Text("$reason x$n", color = Color.White, style = MaterialTheme.typography.bodyMedium) }
+            }
+        } else if (summary.holdSeconds == null) {
+            SummaryValue("Form", "Not judged")
+        }
+        SummaryValue(
+            if (summary.exerciseType.lift) "Most common cue" else "Most common rejection",
+            summary.mostCommonRejectionReason ?: "None",
+        )
+        if (summary.cannotSee.isNotEmpty()) {
+            SummaryValue("Could not see", summary.cannotSee.joinToString(", "))
+        }
 
         Text(
             text = syncMessage,
@@ -129,6 +165,13 @@ fun SetSummaryScreen(
         }
 
         history?.let { RecentHistory(it) }
+
+        Text(
+            text = FORM_DISCLAIMER,
+            color = Color.LightGray,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 24.dp),
+        )
 
         Button(
             onClick = onStartNewSet,
@@ -181,17 +224,26 @@ private fun HistoryRow(set: SyncedSet) {
             .padding(top = 14.dp),
     ) {
         Text(
-            text = if (set.exerciseType == "push-up") "Push-up" else "Squat",
+            text = when (set.exerciseType) {
+                "push-up" -> "Push-up"
+                "squat" -> "Squat"
+                else -> (set.exerciseSlug ?: "Other").replace('-', ' ').replaceFirstChar { it.uppercase() }
+            },
             color = Color.White,
             fontWeight = FontWeight.Bold,
         )
         Text(
-            text = "${set.repCount} attempted / ${set.cleanCount} clean / ${set.attemptedCount} rejected",
+            text = if (set.cleanCount == null || set.attemptedCount == null) {
+                "${set.repCount} reps (form not judged)"
+            } else {
+                "${set.repCount} attempted / ${set.cleanCount} clean / ${set.attemptedCount} rejected"
+            },
             color = Color.LightGray,
             style = MaterialTheme.typography.bodySmall,
         )
         Text(
-            text = "FormScore ${String.format(Locale.US, "%.1f%%", set.formscore)}  ${set.timestamp.replace('T', ' ').take(16)}",
+            text = (if (set.repCount <= 0) "not counted  " else rowScore(set.formscore, set.repCount)?.let { "Score $it ${scoreBand(it).label}  " } ?: "") +
+                set.timestamp.replace('T', ' ').take(16),
             color = Color.Gray,
             style = MaterialTheme.typography.bodySmall,
         )
@@ -206,4 +258,11 @@ private fun SummaryValue(label: String, value: String) {
         style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(top = 12.dp),
     )
+}
+
+/** Why this set is not uploaded (null = upload it). Plank has no server field; zero reps is rejected by the server. */
+private fun notUploadable(summary: RepSetSummary): String? = when {
+    summary.holdSeconds != null -> "Plank holds are not synced yet."
+    summary.saveBlocker() == SaveResult.NO_REPS -> NO_REPS_MESSAGE
+    else -> null
 }

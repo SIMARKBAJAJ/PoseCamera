@@ -1,0 +1,317 @@
+{
+  "_meta": {
+    "version": "0.1-research",
+    "generated": "2026-10-16",
+    "landmark_names": "MediaPipe PoseLandmarker 33-landmark topology (nose, shoulders 11/12, elbows 13/14, wrists 15/16, hips 23/24, knees 25/26, ankles 27/28, heels 29/30, foot_index 31/32)",
+    "policy": "threshold is null unless a published numeric criterion was actually found. source is null when no verified citation supports the fault itself. verified=true ONLY when the cited abstract/paper directly supports the qualitative fault claim (read by the researcher); it never means a numeric threshold is validated. NSCA Essentials and ACSM guidelines are paywalled books and were not accessible, so nothing is attributed to them.",
+    "landmark_limits": "MediaPipe has no spine/pelvis/scapula/barbell landmarks. Lumbar flexion, scapular elevation, bar path, knee-over-toe on bar and foot pressure are proxies at best.",
+    "phone_setup": "single phone, camera 30-45 deg off the user's front: both frontal and partial sagittal view, never a clean frontal or sagittal plane.",
+    "validation_sources": {
+      "oliosi_2026_camera_position": "https://doi.org/10.2196/82412",
+      "asaeda_2024_mediapipe_valgus_vs_vicon": "https://doi.org/10.1016/j.heliyon.2024.e36338",
+      "janisch_2026_blazepose_frontal_knee": "https://doi.org/10.1186/s12891-026-09958-9",
+      "blazepose_paper": "https://arxiv.org/abs/2006.10204"
+    }
+  },
+  "lifts": [
+    {
+      "id": "bodyweight_squat", "name": "Bodyweight squat", "pattern": "squat",
+      "faults": [
+        {"id": "insufficient_depth", "description": "Does not reach a parallel-ish depth (hip crease near knee height)", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "45", "threshold": null, "unit": "deg knee flexion", "source": null, "verified": false},
+        {"id": "knee_valgus", "description": "Knees collapse inward during descent/ascent (dynamic knee valgus)", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "front", "threshold": null, "unit": "deg frontal projection angle change from standing", "source": "https://doi.org/10.1177/0363546504269591", "verified": false},
+        {"id": "excess_forward_trunk_lean", "description": "Trunk inclines forward excessively", "measurable": true, "landmarks": ["shoulder","hip","knee"], "view": "side", "threshold": null, "unit": "deg trunk-from-vertical", "source": "https://doi.org/10.1519/JSC.0b013e3181bac2d7", "verified": false},
+        {"id": "heel_rise", "description": "Heels leave the floor", "measurable": true, "landmarks": ["heel","foot_index"], "view": "side", "threshold": null, "unit": "heel y-displacement / shin length", "source": null, "verified": false},
+        {"id": "lumbar_flexion_butt_wink", "description": "Pelvis tucks / lumbar rounds at bottom", "measurable": false, "landmarks": [], "view": "side", "threshold": null, "unit": null, "source": null, "verified": false},
+        {"id": "left_right_asymmetry", "description": "Uneven knee/hip angles left vs right (weight shift)", "measurable": true, "landmarks": ["hips","knees","ankles"], "view": "front", "threshold": null, "unit": "deg L-R knee angle difference", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "knee_flexion (hip-knee-ankle); top >= ~165 deg, bottom = per-rep minimum; descent = decreasing, ascent = increasing",
+      "camera_ok_at_45": true,
+      "notes": "45 deg gives depth and approximate valgus; the true frontal-plane valgus angle is attenuated. Use change-from-standing, not absolute angle (see Asaeda 2024)."
+    },
+    {
+      "id": "goblet_squat", "name": "Goblet squat", "pattern": "squat",
+      "faults": [
+        {"id": "insufficient_depth", "description": "Does not reach parallel-ish depth", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "45", "threshold": null, "unit": "deg knee flexion", "source": null, "verified": false},
+        {"id": "knee_valgus", "description": "Knees collapse inward", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "front", "threshold": null, "unit": "deg", "source": "https://doi.org/10.1177/0363546504269591", "verified": false},
+        {"id": "weight_drifts_forward_trunk_lean", "description": "Chest drops / trunk leans forward (weight held at chest occludes torso landmarks)", "measurable": true, "landmarks": ["shoulder","hip"], "view": "side", "threshold": null, "unit": "deg trunk-from-vertical", "source": null, "verified": false},
+        {"id": "elbow_position", "description": "Elbows drift away from the weight/torso", "measurable": false, "landmarks": ["elbow","wrist"], "view": "any", "threshold": null, "unit": null, "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "knee_flexion",
+      "camera_ok_at_45": true,
+      "notes": "Dumbbell/kettlebell at chest occludes shoulder/elbow landmarks; lower hip and knee landmarks stay usable. Count reps on knee/hip only."
+    },
+    {
+      "id": "barbell_back_squat", "name": "Barbell back squat", "pattern": "squat",
+      "faults": [
+        {"id": "insufficient_depth", "description": "Hip crease does not reach knee-level depth", "measurable": true, "landmarks": ["hip","knee"], "view": "side", "threshold": null, "unit": "hip y vs knee y", "source": null, "verified": false},
+        {"id": "knee_valgus", "description": "Knee valgus under load", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "front", "threshold": null, "unit": "deg", "source": "https://doi.org/10.1177/0363546504269591", "verified": false},
+        {"id": "excess_trunk_lean_good_morning", "description": "Hips rise faster than shoulders (good-morning squat), trunk too horizontal", "measurable": true, "landmarks": ["shoulder","hip","knee"], "view": "side", "threshold": null, "unit": "deg trunk vs shin", "source": "https://doi.org/10.1519/JSC.0b013e3181bac2d7", "verified": false},
+        {"id": "lumbar_flexion", "description": "Lumbar rounding at bottom", "measurable": false, "landmarks": [], "view": "side", "threshold": null, "unit": null, "source": "https://doi.org/10.1519/JSC.0b013e3181bac2d7", "verified": false},
+        {"id": "knees_past_toes", "description": "Knees travel far forward of toes. Fry 2003 (bibliographic details only, abstract not read) is the usual citation that restricting knee travel shifts load to hip/low back; do not flag as an error", "measurable": true, "landmarks": ["knee","foot_index"], "view": "side", "threshold": null, "unit": "knee x - toe x / femur length", "source": "https://doi.org/10.1519/00124278-200311000-00001", "verified": false}
+      ],
+      "rep_phase_joint": "knee_flexion; top >= ~165 deg",
+      "camera_ok_at_45": false,
+      "notes": "Bar and plates occlude shoulders/hips from the side; barbell on back hides wrist/elbow. Depth and valgus are usable; trunk lean is coarse. Bar path not available."
+    },
+    {
+      "id": "barbell_front_squat", "name": "Barbell front squat", "pattern": "squat",
+      "faults": [
+        {"id": "insufficient_depth", "description": "Not reaching depth", "measurable": true, "landmarks": ["hip","knee"], "view": "side", "threshold": null, "unit": "hip y vs knee y", "source": null, "verified": false},
+        {"id": "knee_valgus", "description": "Knee valgus", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "front", "threshold": null, "unit": "deg", "source": "https://doi.org/10.1177/0363546504269591", "verified": false},
+        {"id": "torso_collapse_forward", "description": "Upper back rounds / elbows drop, torso falls forward", "measurable": true, "landmarks": ["shoulder","hip","elbow"], "view": "side", "threshold": null, "unit": "deg trunk-from-vertical; elbow height vs shoulder", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "knee_flexion",
+      "camera_ok_at_45": false,
+      "notes": "Same occlusion problem as back squat; elbows are visible from 45 deg but wrist/bar are not."
+    },
+    {
+      "id": "lunge", "name": "Lunge (forward/reverse)", "pattern": "lunge",
+      "faults": [
+        {"id": "front_knee_valgus", "description": "Front knee collapses inward", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "front", "threshold": null, "unit": "deg", "source": "https://doi.org/10.1177/0363546504269591", "verified": false},
+        {"id": "excess_trunk_lean", "description": "Trunk leans forward excessively", "measurable": true, "landmarks": ["shoulder","hip"], "view": "side", "threshold": null, "unit": "deg trunk-from-vertical", "source": null, "verified": false},
+        {"id": "insufficient_depth", "description": "Front knee flexion shallow", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "45", "threshold": null, "unit": "deg front-knee flexion", "source": null, "verified": false},
+        {"id": "heel_lift_front_foot", "description": "Front heel rises", "measurable": true, "landmarks": ["heel","foot_index"], "view": "side", "threshold": null, "unit": "heel y-displacement", "source": null, "verified": false},
+        {"id": "wide_balance_sway", "description": "Lateral sway / balance loss", "measurable": true, "landmarks": ["hips","shoulders"], "view": "front", "threshold": null, "unit": "mid-hip x deviation", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "front_knee_flexion (leading leg picked by lower ankle-y at bottom)",
+      "camera_ok_at_45": true,
+      "notes": "Leg identification needs landmark tracking through leg swap; self-occlusion of rear leg at 45 deg. Front-leg selection must be done per rep."
+    },
+    {
+      "id": "conventional_deadlift", "name": "Conventional deadlift", "pattern": "hinge",
+      "faults": [
+        {"id": "lumbar_rounding", "description": "Lumbar/thoracic flexion rises with load (rounded back)", "measurable": false, "landmarks": ["shoulder","hip","knee"], "view": "side", "threshold": null, "unit": "deg trunk-angle drift during pull (proxy only)", "source": "https://doi.org/10.3389/fspor.2025.1682991", "verified": true},
+        {"id": "hips_rise_first", "description": "Hips shoot up before the bar leaves the floor (stripper pull)", "measurable": true, "landmarks": ["hip","shoulder","knee"], "view": "side", "threshold": null, "unit": "hip-rise rate vs shoulder-rise rate", "source": "https://doi.org/10.1097/00005768-200007000-00013", "verified": false},
+        {"id": "incomplete_lockout", "description": "Hips/knees not fully extended at top", "measurable": true, "landmarks": ["shoulder","hip","knee","ankle"], "view": "side", "threshold": null, "unit": "deg hip extension", "source": null, "verified": false},
+        {"id": "bar_drift_from_body", "description": "Bar path away from shins", "measurable": false, "landmarks": ["wrist"], "view": "side", "threshold": null, "unit": "wrist x vs ankle x (bar proxy)", "source": null, "verified": false},
+        {"id": "knee_valgus", "description": "Knees cave on lift-off", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "front", "threshold": null, "unit": "deg", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "hip_extension (shoulder-hip-knee); bottom = min hip angle; concentric = increasing",
+      "camera_ok_at_45": false,
+      "notes": "Escamilla 2000 reports conventional vs sumo kinematics (e.g. approx 5-10 deg more horizontal trunk in conventional) from competition video; these are descriptive means of strong lifters, not safe/unsafe thresholds. Lumbar flexion is not measurable from pose landmarks; Shoji 2025 used a six-marker optical spine model."
+    },
+    {
+      "id": "romanian_deadlift", "name": "Romanian deadlift", "pattern": "hinge",
+      "faults": [
+        {"id": "knee_bend_too_much", "description": "Knees bend into a squat instead of hinge", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "side", "threshold": null, "unit": "deg knee flexion range during rep", "source": null, "verified": false},
+        {"id": "lumbar_rounding", "description": "Back rounds at the bottom", "measurable": false, "landmarks": [], "view": "side", "threshold": null, "unit": null, "source": "https://doi.org/10.3389/fspor.2025.1682991", "verified": false},
+        {"id": "insufficient_hinge", "description": "Too little hip flexion (ROM)", "measurable": true, "landmarks": ["shoulder","hip","knee"], "view": "side", "threshold": null, "unit": "deg hip flexion", "source": null, "verified": false},
+        {"id": "bar_drift", "description": "Bar swings away from legs", "measurable": false, "landmarks": ["wrist"], "view": "side", "threshold": null, "unit": null, "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "hip_flexion (shoulder-hip-knee); bottom = min angle",
+      "camera_ok_at_45": false,
+      "notes": "Shoji 2025 is cited for conventional deadlift only; extension to RDL is an assumption."
+    },
+    {
+      "id": "glute_bridge_hip_thrust", "name": "Glute bridge / hip thrust", "pattern": "hip_extension",
+      "faults": [
+        {"id": "lumbar_hyperextension", "description": "Lower back arches instead of hips extending at the top", "measurable": false, "landmarks": ["shoulder","hip","knee"], "view": "side", "threshold": null, "unit": "hip-extension beyond neutral line (proxy)", "source": null, "verified": false},
+        {"id": "incomplete_lockout", "description": "Hips do not reach shoulder-hip-knee line", "measurable": true, "landmarks": ["shoulder","hip","knee"], "view": "side", "threshold": null, "unit": "deg hip angle at top", "source": null, "verified": false},
+        {"id": "pelvic_asymmetry", "description": "One hip lower than other", "measurable": true, "landmarks": ["hips"], "view": "front", "threshold": null, "unit": "deg hip-line tilt", "source": null, "verified": false},
+        {"id": "knee_splay", "description": "Knees fall in/out", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "front", "threshold": null, "unit": "deg", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "hip_extension (shoulder-hip-knee); top = near 180",
+      "camera_ok_at_45": true,
+      "notes": "Lying on floor: user at ~45 deg phone angle fine; barbell over hips occludes hip landmarks. Contreras 2015 (https://doi.org/10.1123/jab.2014-0301) shows higher glute EMG in hip thrust than back squat; not a form criterion."
+    },
+    {
+      "id": "push_up", "name": "Push-up", "pattern": "horizontal_push",
+      "faults": [
+        {"id": "hip_sag_pike", "description": "Body line breaks (hips sag or pike)", "measurable": true, "landmarks": ["shoulder","hip","ankle"], "view": "side", "threshold": null, "unit": "deg shoulder-hip-ankle deviation from 180", "source": null, "verified": false},
+        {"id": "insufficient_depth", "description": "Elbows do not reach ~90 deg", "measurable": true, "landmarks": ["shoulder","elbow","wrist"], "view": "45", "threshold": null, "unit": "deg elbow flexion", "source": null, "verified": false},
+        {"id": "elbow_flare", "description": "Upper arm abducted far from torso", "measurable": true, "landmarks": ["shoulder","elbow","hip"], "view": "front", "threshold": null, "unit": "deg arm-to-torso", "source": null, "verified": false},
+        {"id": "scapular_winging", "description": "Scapular control loss", "measurable": false, "landmarks": [], "view": "any", "threshold": null, "unit": null, "source": "https://doi.org/10.1186/s13018-025-06212-1", "verified": false}
+      ],
+      "rep_phase_joint": "elbow_flexion (shoulder-elbow-wrist); top >= ~160 deg, bottom <= ~100 deg (project defaults, unsourced)",
+      "camera_ok_at_45": true,
+      "notes": "Already implemented in app. Many web sources cite 45 deg elbow tuck, but no peer-reviewed threshold was found; keep as a soft cue only. Oliosi 2026 found push-ups best detected from diagonal views at 90-180 cm."
+    },
+    {
+      "id": "bench_press", "name": "Bench press", "pattern": "horizontal_push",
+      "faults": [
+        {"id": "uneven_bar_asymmetry", "description": "Left/right wrists or elbows at different heights", "measurable": true, "landmarks": ["wrists","elbows"], "view": "front", "threshold": null, "unit": "L-R height difference / forearm length", "source": null, "verified": false},
+        {"id": "elbow_flare", "description": "Excess elbow abduction", "measurable": true, "landmarks": ["shoulder","elbow","hip"], "view": "front", "threshold": null, "unit": "deg", "source": null, "verified": false},
+        {"id": "bar_path", "description": "Bar path deviation. Bar kinematics change with fatigue (Duffey & Challis 2007)", "measurable": false, "landmarks": ["wrist"], "view": "side", "threshold": null, "unit": "wrist-trajectory proxy", "source": "https://doi.org/10.1519/R-19885.1", "verified": false},
+        {"id": "butt_lift_arch", "description": "Hips lift off bench", "measurable": false, "landmarks": ["hip"], "view": "side", "threshold": null, "unit": null, "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "elbow_flexion; top = lockout, bottom = min",
+      "camera_ok_at_45": false,
+      "notes": "Lying supine with bar over chest; a phone at 45 deg to the front sees mostly the bench side. Grip-width effects on muscle activity are small (Lehman 2005, https://doi.org/10.1519/R-15024.1) so grip width is not flagged."
+    },
+    {
+      "id": "overhead_press", "name": "Overhead (shoulder) press", "pattern": "vertical_push",
+      "faults": [
+        {"id": "lumbar_lean_back", "description": "Trunk leans backward / ribs flare to finish the press", "measurable": true, "landmarks": ["shoulder","hip","ankle"], "view": "side", "threshold": null, "unit": "deg trunk backward from vertical", "source": null, "verified": false},
+        {"id": "incomplete_lockout", "description": "Elbow not fully extended overhead", "measurable": true, "landmarks": ["shoulder","elbow","wrist"], "view": "any", "threshold": null, "unit": "deg elbow extension", "source": null, "verified": false},
+        {"id": "asymmetry", "description": "One arm presses higher/faster", "measurable": true, "landmarks": ["wrists","elbows"], "view": "front", "threshold": null, "unit": "L-R wrist height diff", "source": null, "verified": false},
+        {"id": "shoulder_shrug_elevation", "description": "Shoulders shrug toward ears", "measurable": true, "landmarks": ["shoulder","ear"], "view": "front", "threshold": null, "unit": "shoulder-ear distance / shoulder width", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "elbow_flexion",
+      "camera_ok_at_45": true,
+      "notes": "Lean-back is poorly visible at 45 deg (needs side). Overhead limb may leave frame."
+    },
+    {
+      "id": "bent_over_row", "name": "Bent-over row (barbell/dumbbell)", "pattern": "horizontal_pull",
+      "faults": [
+        {"id": "trunk_too_upright_swing", "description": "Trunk angle changes during the row (momentum/swing)", "measurable": true, "landmarks": ["shoulder","hip"], "view": "side", "threshold": null, "unit": "deg trunk-angle range during set", "source": null, "verified": false},
+        {"id": "lumbar_rounding", "description": "Lumbar flexion under load. Standing barbell row produced the largest lumbar load among rows tested (Fenwick 2009, n=7 men)", "measurable": false, "landmarks": [], "view": "side", "threshold": null, "unit": null, "source": "https://doi.org/10.1519/JSC.0b013e3181b07334", "verified": false},
+        {"id": "incomplete_pull", "description": "Elbow does not pass torso line", "measurable": true, "landmarks": ["shoulder","elbow","hip"], "view": "side", "threshold": null, "unit": "elbow x vs hip x", "source": null, "verified": false},
+        {"id": "asymmetry", "description": "Uneven pull L vs R", "measurable": true, "landmarks": ["elbows","wrists"], "view": "front", "threshold": null, "unit": "L-R diff", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "elbow_flexion; concentric = decreasing elbow angle",
+      "camera_ok_at_45": false,
+      "notes": "Hinged trunk with the user rotated 45 deg: near-side limb occludes far side."
+    },
+    {
+      "id": "seated_cable_row", "name": "Seated cable row", "pattern": "horizontal_pull",
+      "faults": [
+        {"id": "trunk_swing", "description": "Torso leans back/forth to drive the weight", "measurable": true, "landmarks": ["shoulder","hip"], "view": "side", "threshold": null, "unit": "deg trunk-angle range", "source": null, "verified": false},
+        {"id": "shoulder_shrug", "description": "Shoulders rise toward ears", "measurable": true, "landmarks": ["shoulder","ear"], "view": "front", "threshold": null, "unit": "ratio", "source": null, "verified": false},
+        {"id": "incomplete_rom", "description": "Elbows do not pass torso", "measurable": true, "landmarks": ["shoulder","elbow","hip"], "view": "side", "threshold": null, "unit": "elbow x vs hip x", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "elbow_flexion",
+      "camera_ok_at_45": false,
+      "notes": "Machine, seat and cable occlude legs/hips; only upper body reliably tracked."
+    },
+    {
+      "id": "pull_up_chin_up", "name": "Pull-up / chin-up", "pattern": "vertical_pull",
+      "faults": [
+        {"id": "incomplete_rom_chin_below_bar", "description": "Chin does not clear bar / elbows do not reach full extension at bottom", "measurable": true, "landmarks": ["nose","wrist","elbow","shoulder"], "view": "front", "threshold": null, "unit": "nose y vs wrist y; elbow deg", "source": null, "verified": false},
+        {"id": "kipping_swing", "description": "Hip/leg swing for momentum", "measurable": true, "landmarks": ["hip","shoulder"], "view": "side", "threshold": null, "unit": "hip x-displacement", "source": null, "verified": false},
+        {"id": "shoulder_shrug_dead_hang", "description": "Shoulders elevate at bottom (passive hang)", "measurable": true, "landmarks": ["shoulder","ear"], "view": "front", "threshold": null, "unit": "ratio", "source": null, "verified": false},
+        {"id": "asymmetry", "description": "One side pulls higher", "measurable": true, "landmarks": ["elbows","wrists"], "view": "front", "threshold": null, "unit": "L-R diff", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "elbow_flexion; top <= ~70 deg, bottom >= ~160 deg (project defaults, unsourced)",
+      "camera_ok_at_45": true,
+      "notes": "Dickie 2017 (https://doi.org/10.1016/j.jelekin.2016.11.004) reports grip changes muscle activation; no form-error criteria. Bar may hide wrists."
+    },
+    {
+      "id": "lat_pulldown", "name": "Lat pulldown", "pattern": "vertical_pull",
+      "faults": [
+        {"id": "trunk_lean_back_momentum", "description": "Excess backward lean to pull the bar", "measurable": true, "landmarks": ["shoulder","hip"], "view": "side", "threshold": null, "unit": "deg trunk-from-vertical", "source": null, "verified": false},
+        {"id": "shoulder_shrug", "description": "Shoulders elevate", "measurable": true, "landmarks": ["shoulder","ear"], "view": "front", "threshold": null, "unit": "ratio", "source": null, "verified": false},
+        {"id": "incomplete_rom", "description": "Elbows not fully extended at top / bar not to chest", "measurable": true, "landmarks": ["shoulder","elbow","wrist"], "view": "front", "threshold": null, "unit": "deg elbow ext", "source": null, "verified": false},
+        {"id": "behind_neck_pull", "description": "Bar pulled behind the neck (shoulder-stress risk)", "measurable": true, "landmarks": ["nose","wrist","shoulder"], "view": "side", "threshold": null, "unit": "wrist x vs ear x", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "elbow_flexion",
+      "camera_ok_at_45": true,
+      "notes": "The behind-neck risk rests on common coaching practice; no verified citation."
+    },
+    {
+      "id": "biceps_curl", "name": "Biceps curl", "pattern": "elbow_flexion",
+      "faults": [
+        {"id": "torso_swing", "description": "Trunk sways back to swing the weight", "measurable": true, "landmarks": ["shoulder","hip"], "view": "side", "threshold": null, "unit": "deg trunk-angle range", "source": null, "verified": false},
+        {"id": "elbow_drift_forward", "description": "Elbow travels forward (shoulder flexion)", "measurable": true, "landmarks": ["shoulder","elbow","hip"], "view": "side", "threshold": null, "unit": "deg upper-arm-to-torso", "source": null, "verified": false},
+        {"id": "incomplete_rom", "description": "Partial range", "measurable": true, "landmarks": ["shoulder","elbow","wrist"], "view": "45", "threshold": null, "unit": "deg elbow range", "source": null, "verified": false},
+        {"id": "asymmetry", "description": "Arms curl unevenly", "measurable": true, "landmarks": ["elbows","wrists"], "view": "front", "threshold": null, "unit": "deg L-R", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "elbow_flexion; top(contracted) <= ~50 deg, bottom >= ~150 deg (defaults, unsourced)",
+      "camera_ok_at_45": true,
+      "notes": "Highly measurable; faults are plain kinematics. No peer-reviewed numeric swing limit found."
+    },
+    {
+      "id": "triceps_pushdown_dip", "name": "Triceps pushdown / dip", "pattern": "elbow_extension",
+      "faults": [
+        {"id": "elbow_flare_drift", "description": "Elbows leave the sides (pushdown)", "measurable": true, "landmarks": ["shoulder","elbow","hip"], "view": "front", "threshold": null, "unit": "deg", "source": null, "verified": false},
+        {"id": "torso_lean_momentum", "description": "Leaning over the stack for momentum", "measurable": true, "landmarks": ["shoulder","hip"], "view": "side", "threshold": null, "unit": "deg trunk", "source": null, "verified": false},
+        {"id": "dip_excess_depth_shoulder", "description": "Dip descent too deep, shoulder extends far behind torso", "measurable": true, "landmarks": ["shoulder","elbow","wrist"], "view": "side", "threshold": null, "unit": "deg shoulder extension / elbow flexion", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "elbow_flexion",
+      "camera_ok_at_45": true,
+      "notes": "Dip depth limits are from coaching practice; no verified citation (a blog claim was seen and rejected as unverifiable)."
+    },
+    {
+      "id": "lateral_raise", "name": "Lateral raise", "pattern": "shoulder_abduction",
+      "faults": [
+        {"id": "raise_above_shoulder", "description": "Arms raised well above shoulder height / shrugging", "measurable": true, "landmarks": ["shoulder","elbow","hip"], "view": "front", "threshold": null, "unit": "deg shoulder abduction", "source": null, "verified": false},
+        {"id": "torso_swing", "description": "Momentum from trunk lean", "measurable": true, "landmarks": ["shoulder","hip"], "view": "side", "threshold": null, "unit": "deg", "source": null, "verified": false},
+        {"id": "shrug_trap_dominance", "description": "Shoulder elevation", "measurable": true, "landmarks": ["shoulder","ear"], "view": "front", "threshold": null, "unit": "ratio", "source": null, "verified": false},
+        {"id": "plane_scaption", "description": "Arms raised in scapular plane vs coronal", "measurable": false, "landmarks": [], "view": "45", "threshold": null, "unit": null, "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "shoulder_abduction (hip-shoulder-elbow); bottom ~ < 20 deg, top ~ 80-100 deg (defaults, unsourced)",
+      "camera_ok_at_45": true,
+      "notes": "Top-of-range arm angle is attenuated at 45 deg view; depth ambiguity in z."
+    },
+    {
+      "id": "plank", "name": "Plank", "pattern": "isometric_core",
+      "faults": [
+        {"id": "hip_sag", "description": "Hips drop below the shoulder-ankle line", "measurable": true, "landmarks": ["shoulder","hip","ankle"], "view": "side", "threshold": null, "unit": "deg deviation of hip from shoulder-ankle line", "source": null, "verified": false},
+        {"id": "hip_pike", "description": "Hips high", "measurable": true, "landmarks": ["shoulder","hip","ankle"], "view": "side", "threshold": null, "unit": "deg", "source": null, "verified": false},
+        {"id": "head_drop", "description": "Neck not neutral", "measurable": true, "landmarks": ["ear","shoulder","hip"], "view": "side", "threshold": null, "unit": "deg", "source": null, "verified": false},
+        {"id": "elbow_position", "description": "Elbows not under shoulders", "measurable": true, "landmarks": ["shoulder","elbow"], "view": "front", "threshold": null, "unit": "x offset / upper-arm length", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": null,
+      "camera_ok_at_45": true,
+      "notes": "Isometric; use hold timer valid while body-line deviation is below threshold. Body-line logic shared with the push-up."
+    },
+    {
+      "id": "leg_press", "name": "Leg press", "pattern": "squat_machine",
+      "faults": [
+        {"id": "excess_depth_pelvic_tuck", "description": "Pelvis lifts / low back rounds at deep flexion", "measurable": false, "landmarks": ["hip","knee"], "view": "side", "threshold": null, "unit": null, "source": null, "verified": false},
+        {"id": "knee_valgus", "description": "Knees cave on press", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "front", "threshold": null, "unit": "deg", "source": null, "verified": false},
+        {"id": "incomplete_rom", "description": "Partial range", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "side", "threshold": null, "unit": "deg knee flexion range", "source": null, "verified": false},
+        {"id": "knee_lockout_hyperextension", "description": "Knees snapped into hyperextension", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "side", "threshold": null, "unit": "deg knee extension", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "knee_flexion",
+      "camera_ok_at_45": false,
+      "notes": "Machine, sled and plates occlude legs; user reclines. Knee angle usable, valgus not."
+    },
+    {
+      "id": "leg_curl", "name": "Leg curl", "pattern": "knee_flexion",
+      "faults": [
+        {"id": "hip_lift_compensation", "description": "Hips rise off the pad", "measurable": true, "landmarks": ["hip","shoulder"], "view": "side", "threshold": null, "unit": "hip y displacement", "source": null, "verified": false},
+        {"id": "incomplete_rom", "description": "Partial range", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "side", "threshold": null, "unit": "deg knee flexion", "source": null, "verified": false},
+        {"id": "momentum", "description": "Fast uncontrolled return", "measurable": true, "landmarks": ["ankle"], "view": "side", "threshold": null, "unit": "deg/s angular velocity", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "knee_flexion; contracted <= ~60 deg",
+      "camera_ok_at_45": false,
+      "notes": "Machine occludes lower legs; prone position is poor for a front-ish camera."
+    },
+    {
+      "id": "calf_raise", "name": "Calf raise", "pattern": "plantar_flexion",
+      "faults": [
+        {"id": "incomplete_height", "description": "Heel rise too small", "measurable": true, "landmarks": ["heel","foot_index","ankle"], "view": "side", "threshold": null, "unit": "heel y-displacement / shin length", "source": null, "verified": false},
+        {"id": "knee_bend_bounce", "description": "Knees bend to bounce", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "side", "threshold": null, "unit": "deg knee flexion range", "source": null, "verified": false},
+        {"id": "ankle_roll", "description": "Ankle rolls inward/outward", "measurable": false, "landmarks": ["ankle","heel"], "view": "front", "threshold": null, "unit": null, "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "ankle_plantar_flexion (knee-ankle-foot_index) or heel y relative to toe y",
+      "camera_ok_at_45": true,
+      "notes": "Heel/foot-index landmark jitter is large; ankle ROM is small, so pose noise is comparable to the signal."
+    },
+    {
+      "id": "crunch_sit_up", "name": "Crunch / sit-up", "pattern": "trunk_flexion",
+      "faults": [
+        {"id": "neck_pulling", "description": "Head pulled forward by hands", "measurable": true, "landmarks": ["ear","shoulder","wrist"], "view": "side", "threshold": null, "unit": "deg neck flexion vs trunk flexion", "source": null, "verified": false},
+        {"id": "momentum_swing", "description": "Fast swing up", "measurable": true, "landmarks": ["shoulder","hip"], "view": "side", "threshold": null, "unit": "deg/s", "source": null, "verified": false},
+        {"id": "partial_range", "description": "Torso rises too little or too much (hip flexor takeover)", "measurable": true, "landmarks": ["shoulder","hip","knee"], "view": "side", "threshold": null, "unit": "deg trunk-thigh angle", "source": "https://doi.org/10.2519/jospt.2006.36.2.45", "verified": false},
+        {"id": "feet_lift", "description": "Feet leave floor", "measurable": true, "landmarks": ["heel","foot_index"], "view": "side", "threshold": null, "unit": "foot y-displacement", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "trunk_flexion (shoulder-hip-knee)",
+      "camera_ok_at_45": true,
+      "notes": "Escamilla 2006 is EMG on crunch vs sit-up (muscle activation incl. rectus femoris); it is not a kinematic criterion, hence verified=false."
+    },
+    {
+      "id": "face_pull", "name": "Face pull", "pattern": "horizontal_pull_rear_delt",
+      "faults": [
+        {"id": "elbows_below_wrists", "description": "Elbows drop below wrist line", "measurable": true, "landmarks": ["shoulder","elbow","wrist"], "view": "front", "threshold": null, "unit": "elbow y vs wrist y", "source": null, "verified": false},
+        {"id": "trunk_lean_back", "description": "Leaning back to cheat", "measurable": true, "landmarks": ["shoulder","hip"], "view": "side", "threshold": null, "unit": "deg", "source": null, "verified": false},
+        {"id": "no_external_rotation", "description": "Hands not rotating outward by the end position", "measurable": false, "landmarks": ["wrist","elbow"], "view": "front", "threshold": null, "unit": null, "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "elbow_flexion with wrist-to-face distance",
+      "camera_ok_at_45": true,
+      "notes": "Rope/cable can cross the face and disturb ear/nose landmarks."
+    },
+    {
+      "id": "step_up", "name": "Step-up", "pattern": "single_leg",
+      "faults": [
+        {"id": "knee_valgus", "description": "Working knee collapses inward", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "front", "threshold": null, "unit": "deg", "source": "https://doi.org/10.1177/0363546504269591", "verified": false},
+        {"id": "trail_leg_push_off", "description": "Rear leg pushes off the floor", "measurable": false, "landmarks": ["ankle","heel"], "view": "side", "threshold": null, "unit": null, "source": null, "verified": false},
+        {"id": "excess_trunk_lean", "description": "Trunk leans forward or sideways", "measurable": true, "landmarks": ["shoulder","hip"], "view": "side", "threshold": null, "unit": "deg trunk", "source": null, "verified": false},
+        {"id": "incomplete_extension", "description": "Not standing fully upright at top", "measurable": true, "landmarks": ["hip","knee","ankle"], "view": "45", "threshold": null, "unit": "deg knee extension", "source": null, "verified": false}
+      ],
+      "rep_phase_joint": "working_knee_flexion (leg selected by higher-ankle at top)",
+      "camera_ok_at_45": true,
+      "notes": "Step/box can occlude foot landmarks. Working-leg identification per rep is required."
+    }
+  ]
+}

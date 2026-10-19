@@ -1,0 +1,7 @@
+# MET reference notes
+Access: fetched live HTML tables from pacompendium.com adult-compendium sub-pages (headings 01 Bicycling, 02 Conditioning Exercise, 12 Running, 17 Walking), parsed code / MET / description rows. Values copied as printed, none from memory. Descriptions shortened (Taylor Code tags and some wording trimmed).
+Counts: 79 activities, all edition 2024. The 2011 edition was not needed and not fetched.
+Unreadable pages: none. Not read (not needed): Sports (15), Home Activities (05), Miscellaneous (09), Older Adult and Wheelchair compendia.
+Gaps: no "light/moderate" free-weight code on the 2024 page (the 2011 edition has one, not verified here). Push-ups, pull-ups, sit-ups have no individual codes; they appear only as examples in calisthenics 02020/02022/02024. Elliptical has only moderate/vigorous. Treadmill running uses the plain Running speed codes (12028-12120); curved-treadmill and incline codes exist but were excluded.
+Candidates for a generic 'resistance training' default (your choice): 02054 (3.5, multiple exercises 8-15 reps), 02052 (5.0, squats/deadlift), 02050 (6.0, vigorous lifting/powerlifting/bodybuilding), 02061 (5.0, gym weight training class), 02055 (5.8, circuit/supersets). Suggest 02054 as the general default, 02050 as vigorous. Do not average them.
+Cite: Herrmann SD et al. J Sport Health Sci 2024;13(1):6-12. The site asks that MET values not be changed or combined.

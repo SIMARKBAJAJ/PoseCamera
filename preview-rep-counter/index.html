@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SahiRep — Pose Preview</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>SahiRep</h1>
+      <p class="subtitle">Real-time pose detection preview</p>
+    </header>
+    <div class="mode-selector" role="radiogroup" aria-label="Exercise mode">
+      <button id="mode-squat" class="mode-btn active" data-mode="squat" aria-pressed="true">Squat</button>
+      <button id="mode-pushup" class="mode-btn" data-mode="pushup" aria-pressed="false">Push-up</button>
+    </div>
+    <div class="video-wrapper">
+      <video id="webcam" autoplay muted playsinline></video>
+      <canvas id="overlay"></canvas>
+      <div id="status" class="status">Loading model…</div>
+      <div id="hint" class="hint" hidden></div>
+    </div>
+    <div class="stats" aria-live="polite">
+      <div class="stat">
+        <span class="stat-label">Clean</span>
+        <span id="stat-clean" class="stat-value">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Attempted</span>
+        <span id="stat-attempted" class="stat-value">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">FormScore</span>
+        <span id="stat-formscore" class="stat-value">—</span>
+      </div>
+    </div>
+    <footer>
+      <p>On-device • No data leaves your browser</p>
+    </footer>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

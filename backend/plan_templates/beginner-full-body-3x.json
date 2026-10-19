@@ -1,0 +1,33 @@
+{
+  "plans": [
+    {"slug": "tpl-beginner-full-body-3x", "name": "Beginner Full Body 3x (gym)",
+     "level": "beginner", "goal": "general", "days_per_week": 3, "split": "full_body",
+     "verified": false,
+     "notes": "Three full-body sessions per week on non-consecutive days; rotation A, B, C. Add reps first, then load (double progression).",
+     "evidence_notes": ["Set/rep/rest/RIR values are conventional beginner choices, not sourced; check before marking verified."],
+     "sources": [],
+     "days": [
+       {"name": "Full body A", "slots": [
+         {"movement_pattern": "squat", "muscles": ["quadriceps"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 120, "rir": 3, "difficulty_max": "beginner"},
+         {"movement_pattern": "horizontal_push", "muscles": ["chest"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 90, "rir": 3, "difficulty_max": "beginner"},
+         {"movement_pattern": "horizontal_pull", "muscles": ["back"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 90, "rir": 3, "difficulty_max": "beginner"},
+         {"movement_pattern": "hinge", "muscles": ["hamstrings"], "sets": 2, "rep_min": 8, "rep_max": 12, "rest_s": 90, "rir": 3, "difficulty_max": "beginner"},
+         {"movement_pattern": "core_flexion", "muscles": ["abdominals"], "sets": 2, "rep_min": 10, "rep_max": 15, "rest_s": 60, "rir": 2, "difficulty_max": "beginner"}
+       ]},
+       {"name": "Full body B", "slots": [
+         {"movement_pattern": "hinge", "muscles": ["hamstrings"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 120, "rir": 3, "difficulty_max": "beginner"},
+         {"movement_pattern": "vertical_push", "muscles": ["shoulders"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 90, "rir": 3, "difficulty_max": "beginner"},
+         {"movement_pattern": "vertical_pull", "muscles": ["back"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 90, "rir": 3, "difficulty_max": "beginner"},
+         {"movement_pattern": "lunge", "muscles": ["quadriceps", "glutes"], "sets": 2, "rep_min": 8, "rep_max": 12, "rest_s": 90, "rir": 3, "difficulty_max": "beginner"},
+         {"movement_pattern": "core_stability", "muscles": ["abdominals"], "sets": 2, "rep_min": 10, "rep_max": 15, "rest_s": 60, "rir": 2, "difficulty_max": "beginner"}
+       ]},
+       {"name": "Full body C", "slots": [
+         {"movement_pattern": "squat", "muscles": ["quadriceps"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 120, "rir": 3, "difficulty_max": "beginner"},
+         {"movement_pattern": "horizontal_push", "muscles": ["chest"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 90, "rir": 3, "difficulty_max": "beginner"},
+         {"movement_pattern": "horizontal_pull", "muscles": ["back"], "sets": 3, "rep_min": 8, "rep_max": 12, "rest_s": 90, "rir": 3, "difficulty_max": "beginner"},
+         {"movement_pattern": "elbow_flexion", "muscles": ["biceps"], "sets": 2, "rep_min": 10, "rep_max": 15, "rest_s": 60, "rir": 2, "difficulty_max": "beginner"},
+         {"movement_pattern": "elbow_extension", "muscles": ["triceps"], "sets": 2, "rep_min": 10, "rep_max": 15, "rest_s": 60, "rir": 2, "difficulty_max": "beginner"}
+       ]}
+     ]}
+  ]
+}

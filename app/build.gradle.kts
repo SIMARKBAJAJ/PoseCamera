@@ -4,6 +4,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -17,6 +18,8 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        val baseUrl = (project.findProperty("sahirepBaseUrl") as String?) ?: "http://192.168.1.16:5000/"
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
     compileOptions {
@@ -24,7 +27,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
 
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -32,6 +38,10 @@ android {
 }
 
 kotlin { jvmToolchain(17) }
+
+// Room schema JSON is committed (app/schemas) so migrations can be diffed. Version 1 now; any later schema
+// change needs a Migration + version bump in AppDatabase.
+ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 
 dependencies {
     val cameraX = "1.6.1"
@@ -57,6 +67,11 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
+
+    implementation("androidx.room:room-runtime:2.8.5")
+    implementation("androidx.room:room-ktx:2.8.5")
+    ksp("androidx.room:room-compiler:2.8.5")
+    implementation("androidx.work:work-runtime-ktx:2.11.2")
 
     testImplementation("junit:junit:4.13.2")
 }

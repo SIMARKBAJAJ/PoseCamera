@@ -1,0 +1,484 @@
+{
+ "source": {
+  "title": "2024 Adult Compendium of Physical Activities (Herrmann et al., J Sport Health Sci 2024;13(1):6-12)",
+  "publisher": "Compendium of Physical Activities (pacompendium.com)",
+  "url": "https://pacompendium.com",
+  "year": 2024
+ },
+ "activities": [
+  {
+   "code": "02050",
+   "description": "Resistance (weight lifting - free weight, nautilus or universal-type), power lifting or body building, vigorous effort",
+   "met": 6,
+   "edition": "2024"
+  },
+  {
+   "code": "02052",
+   "description": "Resistance (weight) training, squats, deadlift, slow or explosive effort",
+   "met": 5,
+   "edition": "2024"
+  },
+  {
+   "code": "02054",
+   "description": "Resistance (weight) training, multiple exercises, 8-15 reps at varied resistance",
+   "met": 3.5,
+   "edition": "2024"
+  },
+  {
+   "code": "02055",
+   "description": "Resistance training, circuit, reciprocal supersets, peripheral heart action training",
+   "met": 5.8,
+   "edition": "2024"
+  },
+  {
+   "code": "02056",
+   "description": "Body weight resistance exercises (squat, lunge, push-up, crunch), general",
+   "met": 3,
+   "edition": "2024"
+  },
+  {
+   "code": "02057",
+   "description": "Body weight resistance exercises (squat, lunge, push-up, crunch), high intensity",
+   "met": 6.5,
+   "edition": "2024"
+  },
+  {
+   "code": "02061",
+   "description": "Health club exercise classes, general, gym/weight training combined in one visit",
+   "met": 5,
+   "edition": "2024"
+  },
+  {
+   "code": "02060",
+   "description": "Health club exercise, general",
+   "met": 5.5,
+   "edition": "2024"
+  },
+  {
+   "code": "02020",
+   "description": "Calisthenics (pushups, sit ups, pull-ups, jumping jacks, burpees, battling ropes), vigorous effort",
+   "met": 7.5,
+   "edition": "2024"
+  },
+  {
+   "code": "02022",
+   "description": "Calisthenics (pushups, sit ups, pull-ups, lunges), moderate effort",
+   "met": 3.8,
+   "edition": "2024"
+  },
+  {
+   "code": "02024",
+   "description": "Calisthenics (curl ups, abdominal crunches, plank), light effort",
+   "met": 2.8,
+   "edition": "2024"
+  },
+  {
+   "code": "02030",
+   "description": "Calisthenics, light or moderate effort, general (e.g., back exercises)",
+   "met": 3.5,
+   "edition": "2024"
+  },
+  {
+   "code": "02032",
+   "description": "Circuit training, body weight exercises",
+   "met": 6,
+   "edition": "2024"
+  },
+  {
+   "code": "02034",
+   "description": "Circuit training, light effort",
+   "met": 3.5,
+   "edition": "2024"
+  },
+  {
+   "code": "02035",
+   "description": "Circuit training, moderate effort",
+   "met": 5,
+   "edition": "2024"
+  },
+  {
+   "code": "02040",
+   "description": "Circuit training, including kettlebells, minimal rest, vigorous intensity",
+   "met": 7.5,
+   "edition": "2024"
+  },
+  {
+   "code": "02058",
+   "description": "Kettlebell swings",
+   "met": 9.8,
+   "edition": "2024"
+  },
+  {
+   "code": "01200",
+   "description": "Bicycling, stationary, general",
+   "met": 6.8,
+   "edition": "2024"
+  },
+  {
+   "code": "01210",
+   "description": "Bicycling, stationary, 25-30 watts, very light to light effort",
+   "met": 3.5,
+   "edition": "2024"
+  },
+  {
+   "code": "01214",
+   "description": "Bicycling, stationary, 50 watts, light effort",
+   "met": 4,
+   "edition": "2024"
+  },
+  {
+   "code": "01216",
+   "description": "Bicycling, stationary, 60 watts, light to moderate effort",
+   "met": 5,
+   "edition": "2024"
+  },
+  {
+   "code": "01218",
+   "description": "Bicycling, stationary, 70-80 watts",
+   "met": 5.8,
+   "edition": "2024"
+  },
+  {
+   "code": "01220",
+   "description": "Bicycling, stationary, 90-100 watts, moderate to vigorous",
+   "met": 6,
+   "edition": "2024"
+  },
+  {
+   "code": "01224",
+   "description": "Bicycling, stationary, 101-125 watts",
+   "met": 6.8,
+   "edition": "2024"
+  },
+  {
+   "code": "01228",
+   "description": "Bicycling, stationary, 126-150 watts",
+   "met": 8,
+   "edition": "2024"
+  },
+  {
+   "code": "01232",
+   "description": "Bicycling, stationary, 151-199 watts",
+   "met": 10.3,
+   "edition": "2024"
+  },
+  {
+   "code": "01236",
+   "description": "Bicycling, stationary, 200-229 watts, vigorous",
+   "met": 10.8,
+   "edition": "2024"
+  },
+  {
+   "code": "01240",
+   "description": "Bicycling, stationary, 230-250 watts, very vigorous",
+   "met": 12.5,
+   "edition": "2024"
+  },
+  {
+   "code": "01244",
+   "description": "Bicycling, stationary, 270-305 watts, very vigorous",
+   "met": 13.8,
+   "edition": "2024"
+  },
+  {
+   "code": "01248",
+   "description": "Bicycling, stationary, >325 watts, very vigorous",
+   "met": 16.3,
+   "edition": "2024"
+  },
+  {
+   "code": "01270",
+   "description": "Bicycling, stationary, RPM/Spin bike class",
+   "met": 9,
+   "edition": "2024"
+  },
+  {
+   "code": "01305",
+   "description": "Bicycling, high intensity interval training",
+   "met": 8.8,
+   "edition": "2024"
+  },
+  {
+   "code": "17340",
+   "description": "Walking, treadmill, less than 1.0 mph, 0% grade",
+   "met": 2.1,
+   "edition": "2024"
+  },
+  {
+   "code": "17343",
+   "description": "Walking, treadmill, 1.0 mph, 0% grade",
+   "met": 2.3,
+   "edition": "2024"
+  },
+  {
+   "code": "17346",
+   "description": "Walking, treadmill, 1.2 to 1.9 mph, 0% grade",
+   "met": 2.8,
+   "edition": "2024"
+  },
+  {
+   "code": "17349",
+   "description": "Walking, treadmill, 2.0 to 2.4 mph, 0% grade",
+   "met": 3,
+   "edition": "2024"
+  },
+  {
+   "code": "17352",
+   "description": "Walking, treadmill, 2.5 to 2.9 mph, 0% grade",
+   "met": 3.5,
+   "edition": "2024"
+  },
+  {
+   "code": "17355",
+   "description": "Walking, treadmill, 3.0 to 3.4 mph, 0% grade",
+   "met": 3.8,
+   "edition": "2024"
+  },
+  {
+   "code": "17358",
+   "description": "Walking, treadmill, 3.5 to 3.9 mph, 0% grade",
+   "met": 4.8,
+   "edition": "2024"
+  },
+  {
+   "code": "17361",
+   "description": "Walking, treadmill, 4.0 to 4.4 mph, 0% grade",
+   "met": 5.8,
+   "edition": "2024"
+  },
+  {
+   "code": "17364",
+   "description": "Walking, treadmill, 4.5 to 4.9 mph, 0% grade",
+   "met": 6.8,
+   "edition": "2024"
+  },
+  {
+   "code": "17367",
+   "description": "Walking, treadmill, 5.0 to 5.5 mph, 0% grade",
+   "met": 8.3,
+   "edition": "2024"
+  },
+  {
+   "code": "17190",
+   "description": "Walking, 2.8 to 3.4 mph, level, moderate pace, firm surface",
+   "met": 3.8,
+   "edition": "2024"
+  },
+  {
+   "code": "17200",
+   "description": "Walking, 3.5 to 3.9 mph, level, brisk, firm surface, walking for exercise",
+   "met": 4.8,
+   "edition": "2024"
+  },
+  {
+   "code": "12026",
+   "description": "Jogging 2.6 to 3.7 mph",
+   "met": 3.3,
+   "edition": "2024"
+  },
+  {
+   "code": "12020",
+   "description": "Jogging, general, self-selected pace",
+   "met": 7.5,
+   "edition": "2024"
+  },
+  {
+   "code": "12028",
+   "description": "Running, 4 to 4.2 mph (13 min/mile)",
+   "met": 6.5,
+   "edition": "2024"
+  },
+  {
+   "code": "12029",
+   "description": "Running 4.3 to 4.8 mph",
+   "met": 7.8,
+   "edition": "2024"
+  },
+  {
+   "code": "12030",
+   "description": "Running, 5.0 to 5.2 mph (12 min/mile)",
+   "met": 8.5,
+   "edition": "2024"
+  },
+  {
+   "code": "12045",
+   "description": "Running, 5.5 - 5.8 mph",
+   "met": 9,
+   "edition": "2024"
+  },
+  {
+   "code": "12050",
+   "description": "Running, 6-6.3 mph (10 min/mile)",
+   "met": 9.3,
+   "edition": "2024"
+  },
+  {
+   "code": "12060",
+   "description": "Running, 6.7 mph (9 min/mile)",
+   "met": 10.5,
+   "edition": "2024"
+  },
+  {
+   "code": "12070",
+   "description": "Running, 7 mph (8.5 min/mile)",
+   "met": 11,
+   "edition": "2024"
+  },
+  {
+   "code": "12080",
+   "description": "Running, 7.5 mph (8 min/mile)",
+   "met": 11.8,
+   "edition": "2024"
+  },
+  {
+   "code": "12090",
+   "description": "Running, 8 mph (7.5 min/mile)",
+   "met": 12,
+   "edition": "2024"
+  },
+  {
+   "code": "12120",
+   "description": "Running, 10 mph (6 min/mile)",
+   "met": 14.8,
+   "edition": "2024"
+  },
+  {
+   "code": "02070",
+   "description": "Rowing, stationary ergometer, general, vigorous effort",
+   "met": 7.3,
+   "edition": "2024"
+  },
+  {
+   "code": "02071",
+   "description": "Rowing, stationary ergometer, general, <100 watts, moderate effort",
+   "met": 5,
+   "edition": "2024"
+  },
+  {
+   "code": "02072",
+   "description": "Rowing, stationary, 100 to 149 watts, vigorous effort",
+   "met": 7.5,
+   "edition": "2024"
+  },
+  {
+   "code": "02073",
+   "description": "Rowing, stationary, 150 to 199 watts, vigorous effort",
+   "met": 11,
+   "edition": "2024"
+  },
+  {
+   "code": "02074",
+   "description": "Rowing, stationary, >=200 watts, very vigorous effort",
+   "met": 14,
+   "edition": "2024"
+  },
+  {
+   "code": "02048",
+   "description": "Elliptical trainer, moderate effort",
+   "met": 5,
+   "edition": "2024"
+  },
+  {
+   "code": "02049",
+   "description": "Elliptical trainer, vigorous effort",
+   "met": 9,
+   "edition": "2024"
+  },
+  {
+   "code": "02065",
+   "description": "Stair treadmill ergometer, general",
+   "met": 9.3,
+   "edition": "2024"
+  },
+  {
+   "code": "17131",
+   "description": "Stair climbing, general",
+   "met": 6.8,
+   "edition": "2024"
+  },
+  {
+   "code": "17133",
+   "description": "Stair climbing, slow pace",
+   "met": 4.5,
+   "edition": "2024"
+  },
+  {
+   "code": "17134",
+   "description": "Stair climbing, fast pace, one step at a time",
+   "met": 9.3,
+   "edition": "2024"
+  },
+  {
+   "code": "17136",
+   "description": "Stair climbing, two steps at a time",
+   "met": 7.5,
+   "edition": "2024"
+  },
+  {
+   "code": "02101",
+   "description": "Stretching, mild",
+   "met": 2.3,
+   "edition": "2024"
+  },
+  {
+   "code": "02103",
+   "description": "Pilates, traditional, mat",
+   "met": 1.8,
+   "edition": "2024"
+  },
+  {
+   "code": "02105",
+   "description": "Pilates, general",
+   "met": 2.8,
+   "edition": "2024"
+  },
+  {
+   "code": "02150",
+   "description": "Yoga, Hatha",
+   "met": 2.3,
+   "edition": "2024"
+  },
+  {
+   "code": "02153",
+   "description": "Yoga, Hatha, high intensity",
+   "met": 8,
+   "edition": "2024"
+  },
+  {
+   "code": "02155",
+   "description": "Yoga, Hot",
+   "met": 3,
+   "edition": "2024"
+  },
+  {
+   "code": "02175",
+   "description": "Yoga, General",
+   "met": 2.3,
+   "edition": "2024"
+  },
+  {
+   "code": "02180",
+   "description": "Yoga, Surya Namaskar",
+   "met": 3.5,
+   "edition": "2024"
+  },
+  {
+   "code": "02185",
+   "description": "Yoga, Vinyasa",
+   "met": 2.7,
+   "edition": "2024"
+  },
+  {
+   "code": "02210",
+   "description": "High intensity interval exercise, moderate effort",
+   "met": 7,
+   "edition": "2024"
+  },
+  {
+   "code": "02214",
+   "description": "High intensity interval exercise, burpees, mountain climbers, squat jumps, Tabata, vigorous effort",
+   "met": 11,
+   "edition": "2024"
+  }
+ ]
+}
